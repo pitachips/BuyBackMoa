@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html" charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="김현지" />
+</head>
+
+
+<body>
+
+<div align="center" margin="auto">
+    <h1>&raquo; 바이백 모아 &laquo;</h1>
+    <br />
+    <form method="GET" action="/search-result/" role="search">
+        <input type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" />
+        <input type="submit" />
+    </form>
+    <br />
+    {% if advice %}
+    <p>{{ advice }}</p>
+    {% endif %}
+</div>
+
+</body>
+

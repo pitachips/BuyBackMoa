@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html" charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="김현지" />
+</head>
+
+
+<body>
+
+<div>
+    {% for result in total_resultset_paged %}
+    <div>
+        <img src="{{ result.image }}" />
+        <h3> {{ result.title }}</h3>
+        <span>정가: {{ result.original_price }} | 바이백: {{ result.buyback_price }}</span>
+        <a href="{{ result.link }}"><button>{{ result.platform }}에서 팔기</button></a>
+    </div>
+    <hr />
+    {% endfor %}
+
+    <div class="pagination">
+        <span class="step-links">
+        {% if total_resultset_paged.has_previous %}
+            <a href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.previous_page_number }}">prev</a>
+        {% endif %}
+        <span class="current">
+            Page {{ total_resultset_paged.number }} of {{ total_resultset_paged.paginator.num_pages }}
+        </span>
+        {% if total_resultset_paged.has_next %}
+            <a href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.next_page_number }}">next</a>
+        {% endif %}
+    </div>
+</div>
+
+</body>
