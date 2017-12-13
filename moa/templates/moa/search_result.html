@@ -17,9 +17,11 @@
 <div>
     {% for result in total_resultset_paged %}
     <div>
+        <span>{{forloop.counter}}</span>
         <img src="{{ result.image }}" />
         <h3> {{ result.title }}</h3>
-        <span>정가: {{ result.original_price }} | 바이백: {{ result.buyback_price }}</span>
+        <div>정가: {{ result.prices.0 }}</div>
+        <div>바이백(최상): {{ result.prices.1 }} | 바이백(상): {{ result.prices.2 }} | 바이백(중): {{ result.prices.3 }}</div>
 
         {% if result.platform == "yes24" %}
         <a href="{{ yes24_base_url }}{{ result.page }}" target="_blank"><button>{{ result.platform }}에서 팔기</button></a>

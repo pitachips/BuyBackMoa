@@ -27,6 +27,7 @@ def result(request):
 
     yes24_page = 1
     while yes24_page > 0:
+        # TODO: 아래 네 줄은 def soupify 로 캡슐화 가능
         yes24_url = yes24_base_url + str(yes24_page)
         yes24_req = requests.get(yes24_url)
         yes24_html = yes24_req.text
@@ -45,7 +46,7 @@ def result(request):
         except IndexError:
             yes24_page = -100
 
-        # 추후 빠른시일내 아래 내용 효율화 필요. 그냥 리스트 형태로 다 받아서 처리할 건지/
+        # 추후 빠른시일내 아래 내용 효율화 필요. 그냥 리스트 형태로 다 받아서 처리할 건지
         try:
             for i in range(1,21):
                 image = yes24_soup.select(
@@ -59,14 +60,13 @@ def result(request):
                 prices = yes24_soup.select(
                     'ul.clearfix li:nth-of-type(' +str(i) + ') div.bbG_price td'
                     )
-                original_price_v = prices[0].text
-                buyback_price_v = prices[1].text
+                # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
+                prices_v = list(map(lambda p:p.text, prices))
 
                 yes24_resultset.append({
                     'image':image_v,
                     'title':title_v,
-                    'original_price':original_price_v,
-                    'buyback_price':buyback_price_v,
+                    'prices':prices_v,
                     'platform':'yes24',
                     'page':yes24_page,
                     })
@@ -113,14 +113,13 @@ def result(request):
                 image_v = image[i].get('src')
                 title = aladin_soup.select('#searchResult td > a > strong')
                 title_v = title[i].text
-                original_price_v = prices[4*i].get_text()
-                buyback_price_v = prices[4*i+1].get_text()
+                # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
+                prices_v = list(map(lambda p:p.text, prices[4*i:4*(i+1)]))
 
                 aladin_resultset.append({
                     'image':image_v,
                     'title':title_v,
-                    'original_price':original_price_v,
-                    'buyback_price':buyback_price_v,
+                    'prices':prices_v,
                     'platform':'aladin',
                     'page':aladin_page,
                     })
@@ -155,8 +154,6 @@ def result(request):
 
 
 ### 앞으로 할 일(BACK)
-# TODO: 모든 바이백 가격 다 긁어와서 보여주기
-
 # TODO: 크롤링 부분을 함수화 할지 그냥 냅둘지 고민 필요
 # TODO: 서치할 때 모든 자료를 다 받아오는 오버헤드 발생 방지 필요
 # TODO: 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법
@@ -166,3 +163,5 @@ def result(request):
 # TODO: 향후 DB에 저장해놓고 매일 자정에 DB 업데이트 하는 방향으로 개선
 # TODO: 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
 # TODO: 향후 interpark 중고도서 서비스 추가
+
+# TODO: 프론트에 부트스트랩 적용
