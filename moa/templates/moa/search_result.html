@@ -11,13 +11,22 @@
 
 <body>
 
+<h3 id="test">
+</h3>
+
 <div>
     {% for result in total_resultset_paged %}
     <div>
         <img src="{{ result.image }}" />
         <h3> {{ result.title }}</h3>
         <span>정가: {{ result.original_price }} | 바이백: {{ result.buyback_price }}</span>
-        <a href="{{ result.link }}"><button>{{ result.platform }}에서 팔기</button></a>
+
+        {% if result.platform == "yes24" %}
+        <a href="{{ yes24_base_url }}{{ result.page }}" target="_blank"><button>{{ result.platform }}에서 팔기</button></a>
+        {% elif result.platform == "aladin" %}
+        <a href="{{ aladin_base_url }}{{ result.page }}" target="_blank"><button>{{ result.platform }}에서 팔기</button></a>
+        {% endif %}
+
     </div>
     <hr />
     {% endfor %}

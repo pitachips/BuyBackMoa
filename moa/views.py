@@ -19,17 +19,16 @@ def result(request):
     # 크롤링 파트
     yes24_resultset = []
 
-    # 추후 각 도서별 바이백 링크로 와이어 해야함
-    yes24_link = "http://www.yes24.com/Mall/buyback/"
+    # yes24 바이백 기본 url 세팅
+    # yes24도 euc-kr로 인코딩 가능. 단 url 상에는 utf-16-be 인코딩으로 나타나서 혼란 유발..
+    yes24_base_url = 'http://www.yes24.com/Mall/buyback/Search' \
+        '?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y' \
+        '&SearchWord=' + quote(query, encoding="euc-kr") + '&pageIndex='
 
     yes24_page = 1
     while yes24_page > 0:
-        # yes24도 euc-kr로 인코딩 가능. 단 url 상에는 utf-16-be 인코딩으로 나타나서 혼란 유발..
-        # yes24_req = requests.get('http://www.yes24.co.kr/Mall/buyback/Search?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y&SearchWord=' + quote(query_encoded_for_yes24, safe="%") + '&pageIndex=' + str(yes24_page)) 한글 인코딩 에러 문제.... 5시간 날린......부들부들..
-        yes24_req = requests.get('http://www.yes24.co.kr/Mall/buyback/'
-            'Search?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y'
-            '&SearchWord=' + quote(query, encoding="euc-kr") +
-            '&pageIndex=' + str(yes24_page))
+        yes24_url = yes24_base_url + str(yes24_page)
+        yes24_req = requests.get(yes24_url)
         yes24_html = yes24_req.text
         yes24_soup = BeautifulSoup(yes24_html, 'html.parser')
 
@@ -68,7 +67,6 @@ def result(request):
                     'title':title_v,
                     'original_price':original_price_v,
                     'buyback_price':buyback_price_v,
-                    'link':yes24_link,
                     'platform':'yes24',
                     'page':yes24_page,
                     })
@@ -81,17 +79,16 @@ def result(request):
 
     aladin_resultset = []
 
-    # 추후 각 도서별 바이백 링크로 와이어 해야함
-    aladin_link = "http://used.aladin.co.kr/shop/usedshop/wc2b_gate.aspx"
+    # aladin 바이백 기본 url 세팅
+    aladin_base_url = 'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx' \
+        '?ActionType=1&SearchTarget=Book&x=0&y=0' \
+        '&KeyWord=' + quote(query, encoding="euc-kr") + '&page='
 
     aladin_page = 1
     while aladin_page > 0:
         # aladin도 euc-kr로 인코딩하여 검색
-        aladin_req = requests.get(
-            'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx?'
-            'ActionType=1&SearchTarget=Book&KeyWord='
-            + quote(query, encoding="euc-kr") + '&page='
-            + str(aladin_page) + '&x=0&y=0')
+        aladin_url = aladin_base_url + str(aladin_page)
+        aladin_req = requests.get(aladin_url)
         aladin_html = aladin_req.text
         aladin_soup = BeautifulSoup(aladin_html, 'html.parser')
 
@@ -124,7 +121,6 @@ def result(request):
                     'title':title_v,
                     'original_price':original_price_v,
                     'buyback_price':buyback_price_v,
-                    'link':aladin_link,
                     'platform':'aladin',
                     'page':aladin_page,
                     })
@@ -151,21 +147,22 @@ def result(request):
 
     context = {
         'total_resultset_paged': total_resultset_paged,
+        'yes24_base_url': yes24_base_url,
+        'aladin_base_url': aladin_base_url,
     }
 
     return render(request, 'moa/search_result.html', context)
 
 
 ### 앞으로 할 일(BACK)
-# 추후 각 도서별 바이백 링크로 link 해야함
-# 모든 바이백 가격 다 긁어와서 보여주기
+# TODO: 모든 바이백 가격 다 긁어와서 보여주기
 
-# 크롤링 부분을 함수화 할지 그냥 냅둘지 고민 필요
-# 서치할 때 모든 자료를 다 받아오는 오버헤드 발생 방지 필요
-# 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법
-# total_resultset 정렬 기준 고민 필요
+# TODO: 크롤링 부분을 함수화 할지 그냥 냅둘지 고민 필요
+# TODO: 서치할 때 모든 자료를 다 받아오는 오버헤드 발생 방지 필요
+# TODO: 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법
+# TODO: total_resultset 정렬 기준 고민 필요
 
-# 향후 동일 책을 기준으로 알리딘 vs yes24 vs 인터파크로 보여줘야
-# 향후 DB에 저장해놓고 매일 자정에 DB 업데이트 하는 방향으로 개선
-# 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
-# 향후 interpark 중고도서 서비스 추가
+# TODO: 향후 동일 책을 기준으로 알리딘 vs yes24 vs 인터파크로 보여줘야
+# TODO: 향후 DB에 저장해놓고 매일 자정에 DB 업데이트 하는 방향으로 개선
+# TODO: 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
+# TODO: 향후 interpark 중고도서 서비스 추가
