@@ -1,28 +1,63 @@
-
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta http-equiv="content-type" content="text/html" charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="김현지" />
-</head>
+{% load staticfiles %}
 
 
-<body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html" charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="pita" />
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="{% static 'css/index.css' %}" rel="stylesheet" />
+    <title>Narrow Jumbotron Template for Bootstrap</title>
+  </head>
 
-<div align="center" margin="auto">
-    <h1>&raquo; 바이백 모아 &laquo;</h1>
-    <br />
-    <form method="GET" action="/search-result/" role="search">
-        <input type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" />
-        <input type="submit" />
-    </form>
-    <br />
-    {% if advice %}
-    <p>{{ advice }}</p>
-    {% endif %}
-</div>
 
-</body>
+  <body>
+    <div class="container">
+      <header class="header clearfix">
+        <!--<nav>
+          <ul class="nav nav-pills float-right">
+            <li class="nav-item">
+              <a class="nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Contact</a>
+            </li>
+          </ul>
+        </nav> -->
+        <h3 class="text-muted">바이백 모아</h3>
+      </header>
+
+      <main role="main">
+        <div class="jumbotron">
+          <h1 class="display-3">중고책 매입가 검색</h1>
+          <p class="lead">현재 서비스 중인 온라인 서점</p>
+          <p class="image-wrap">
+            <img class="logo" src="{% static 'image/yes24_logo.png' %}" /><img class="logo" src="{% static 'image/aladin_logo.png' %}" />
+          </p>
+          <form class="form-search form-inline" method="GET" action="/search-result/" role="search">
+            <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" required autofocus />
+            <input class="btn btn-dark" type="submit" />
+          </form>
+
+          {% if advice %}<p>{{ advice }}</p>{% endif %}
+        </div>
+      </main>
+
+      <footer class="footer">
+        <p>&copy; pitachips 2017</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
 
