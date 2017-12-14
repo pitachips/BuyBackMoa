@@ -1,13 +1,76 @@
-from django.shortcuts import render
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import quote
 import re
+import requests
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import render
+
+from bs4 import BeautifulSoup
+from math import ceil
+from urllib.parse import quote
 
 
 # Create your views here.
+
+def soupify(base_url, page):
+    """Make each page into BeautifulSoup object"""
+    url = base_url + str(page)
+    req = requests.get(url)
+    html = req.text
+    soup = BeautifulSoup(html, 'html.parser')
+    return soup
+
+
+def yes24_crawl(soup, resultset, page=1, items_per_page=20):
+    """Crawl until the end of list in yes24"""
+    try:
+        for i in range(1,items_per_page+1):
+            image = soup.select(
+                'ul.clearfix li:nth-of-type(' + str(i) + ') div.bbG_img img'
+                )
+            image_v = image[0].get('src')
+            title = soup.select(
+                'ul.clearfix li:nth-of-type(' + str(i) + ') div.bbG_info a'
+                )
+            title_v = title[0].get('title')
+            prices = soup.select(
+                'ul.clearfix li:nth-of-type(' +str(i) + ') div.bbG_price td'
+                )
+            # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
+            prices_v = list(map(lambda p:p.text, prices))
+
+            resultset.append({
+                'image':image_v,
+                'title':title_v,
+                'prices':prices_v,
+                'platform':'yes24',
+                'page':page,
+                })
+    except IndexError:
+        pass
+
+
+def aladin_crawl(soup, resultset, page=1, items_per_page=10):
+    """Crawl until the end of list in aladin"""
+    try:
+        prices = soup.select('#searchResult .c2b_tablet3')
+        for i in range(items_per_page):
+            image = soup.select('#searchResult td img')
+            image_v = image[i].get('src')
+            title = soup.select('#searchResult td > a > strong')
+            title_v = title[i].text
+            # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
+            prices_v = list(map(lambda p:p.text, prices[4*i:4*(i+1)]))
+
+            resultset.append({
+                'image':image_v,
+                'title':title_v,
+                'prices':prices_v,
+                'platform':'aladin',
+                'page':page,
+                })
+    except IndexError:
+        pass
+
 
 def index(request):
     return render(request, 'moa/index.html')
@@ -16,7 +79,7 @@ def index(request):
 def result(request):
     query = request.GET.get('searchword')
 
-    # 크롤링 파트
+# yes24 크롤링 파트
     yes24_resultset = []
 
     # yes24 바이백 기본 url 세팅
@@ -24,117 +87,64 @@ def result(request):
     yes24_base_url = 'http://www.yes24.com/Mall/buyback/Search' \
         '?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y' \
         '&SearchWord=' + quote(query, encoding="euc-kr") + '&pageIndex='
+    yes24_soup = soupify(yes24_base_url, 1)
 
-    yes24_page = 1
-    while yes24_page > 0:
-        # TODO: 아래 네 줄은 def soupify 로 캡슐화 가능
-        yes24_url = yes24_base_url + str(yes24_page)
-        yes24_req = requests.get(yes24_url)
-        yes24_html = yes24_req.text
-        yes24_soup = BeautifulSoup(yes24_html, 'html.parser')
-
-        # yes24의 결과 개수
-        try:
-            result_count = yes24_soup.select(
-                'div.rstTxt > h3 > strong:nth-of-type(2)'
-                )[0].get_text()
-            if int(re.search(r'\d+', result_count)[0]) > 100:
-                context = {
-                    'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요"
-                }
-                return render(request, 'moa/index.html', context)
-        except IndexError:
-            yes24_page = -100
-
-        # 추후 빠른시일내 아래 내용 효율화 필요. 그냥 리스트 형태로 다 받아서 처리할 건지
-        try:
-            for i in range(1,21):
-                image = yes24_soup.select(
-                    'ul.clearfix li:nth-of-type(' + str(i) + ') div.bbG_img img'
-                    )
-                image_v = image[0].get('src')
-                title = yes24_soup.select(
-                    'ul.clearfix li:nth-of-type(' + str(i) + ') div.bbG_info a'
-                    )
-                title_v = title[0].get('title')
-                prices = yes24_soup.select(
-                    'ul.clearfix li:nth-of-type(' +str(i) + ') div.bbG_price td'
-                    )
-                # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
-                prices_v = list(map(lambda p:p.text, prices))
-
-                yes24_resultset.append({
-                    'image':image_v,
-                    'title':title_v,
-                    'prices':prices_v,
-                    'platform':'yes24',
-                    'page':yes24_page,
-                    })
-
-        except IndexError:
-            yes24_page = -100
-
-        yes24_page += 1
+    yes24_result_count_wrap = yes24_soup.select(
+        'div.rstTxt > h3 > strong:nth-of-type(2)'
+    )
+    if yes24_result_count_wrap:
+        yes24_result_count = int(re.search(r'\d+', yes24_result_count_wrap[0].text)[0])
+        if yes24_result_count > 100:
+            context = {
+                'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요"
+            }
+            return render(request, 'moa/index.html', context)
+        else:
+            num_pages = ceil(yes24_result_count/20)
+            yes24_crawl(yes24_soup, yes24_resultset)
+            for page in range(2, num_pages):
+                yes24_soup = soupify(yes24_base_url, page)
+                yes24_crawl(yes24_soup, yes24_resultset, page)
+    else:
+        # 검색 결과 없음
+        pass
 
 
+#aladin 크롤링 파트
     aladin_resultset = []
 
     # aladin 바이백 기본 url 세팅
     aladin_base_url = 'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx' \
         '?ActionType=1&SearchTarget=Book&x=0&y=0' \
         '&KeyWord=' + quote(query, encoding="euc-kr") + '&page='
+    aladin_soup = soupify(aladin_base_url, 1)
 
-    aladin_page = 1
-    while aladin_page > 0:
-        # aladin도 euc-kr로 인코딩하여 검색
-        aladin_url = aladin_base_url + str(aladin_page)
-        aladin_req = requests.get(aladin_url)
-        aladin_html = aladin_req.text
-        aladin_soup = BeautifulSoup(aladin_html, 'html.parser')
-
-        # aladin의 결과 개수
-        try:
-            result_count = aladin_soup.select(
-                '#pnItemList > table:nth-of-type(1) > tr > td:nth-of-type(1)'
-                + ' > strong')[0].get_text()
-            if int(re.search(r'\d+', result_count)[0]) > 200:
-                context = {
-                    'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요"
-                }
-                return render(request, 'moa/index.html', context)
-        except IndexError:
-            aladin_page = -100
-
-        # 추후 빠른시일내 아래 내용 효율화 필요. 그냥 리스트 형태로 한꺼번에 받아서 처리할 건지... prices 처럼
-        try:
-            prices = aladin_soup.select('#searchResult .c2b_tablet3')
-            for i in range(10):
-                image = aladin_soup.select('#searchResult td img')
-                image_v = image[i].get('src')
-                title = aladin_soup.select('#searchResult td > a > strong')
-                title_v = title[i].text
-                # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
-                prices_v = list(map(lambda p:p.text, prices[4*i:4*(i+1)]))
-
-                aladin_resultset.append({
-                    'image':image_v,
-                    'title':title_v,
-                    'prices':prices_v,
-                    'platform':'aladin',
-                    'page':aladin_page,
-                    })
-
-        except IndexError:
-            aladin_page = -100
-
-        aladin_page += 1
+    aladin_result_count_wrap = aladin_soup.select(
+        '#pnItemList > table:nth-of-type(1) > tr > td:nth-of-type(1) > strong'
+        )
+    if aladin_result_count_wrap:
+        aladin_result_count = int(re.search(r'\d+', aladin_result_count_wrap[0].text)[0])
+        if aladin_result_count > 200:
+            context = {
+                'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요"
+            }
+            return render(request, 'moa/index.html', context)
+        else:
+            num_pages = ceil(aladin_result_count/10)
+            aladin_crawl(aladin_soup, aladin_resultset)
+            for page in range(2, num_pages):
+                aladin_soup = soupify(aladin_base_url, page)
+                aladin_crawl(aladin_soup, aladin_resultset, page)
+    else:
+        #검색결과 없음
+        pass
 
 
-    # page번호 순서대로 정렬
+# page번호 순서대로 정렬
     total_resultset = yes24_resultset + aladin_resultset
     total_resultset = sorted(total_resultset, key=lambda rs : rs['page'])
 
-    # pagination 하여 뿌리기
+# pagination 하여 뿌리기
     page = request.GET.get('page')
     pagniator = Paginator(total_resultset, 20)
     try:
@@ -153,15 +163,19 @@ def result(request):
     return render(request, 'moa/search_result.html', context)
 
 
+
 ### 앞으로 할 일(BACK)
-# TODO: 크롤링 부분을 함수화 할지 그냥 냅둘지 고민 필요
-# TODO: 서치할 때 모든 자료를 다 받아오는 오버헤드 발생 방지 필요
-# TODO: 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법
+# TODO: 결과가 없을 때 취할 모션은?
+# TODO: author, pubdate, publisher 추가로 크롤링
+# TODO: 향후 동일 책을 기준으로 알리딘 vs yes24 vs 인터파크로 보여줘야
+# TODO: 향후 interpark 중고도서 서비스 추가
+
 # TODO: total_resultset 정렬 기준 고민 필요
 
-# TODO: 향후 동일 책을 기준으로 알리딘 vs yes24 vs 인터파크로 보여줘야
-# TODO: 향후 DB에 저장해놓고 매일 자정에 DB 업데이트 하는 방향으로 개선
+# TODO: 향후 DB에 저장해놓고 매일 자정에 DB 업데이트 하는 방향으로 개선?
+
+# TODO: 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법
 # TODO: 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
-# TODO: 향후 interpark 중고도서 서비스 추가
+# TODO: 프론트에서 ajax로 페이지네이션 구현
 
 # TODO: 프론트에 부트스트랩 적용
