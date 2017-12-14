@@ -20,6 +20,7 @@
         <span>{{forloop.counter}}</span>
         <img src="{{ result.image }}" />
         <h3> {{ result.title }}</h3>
+        <div><span>{{result.author}} | {{result.publisher}} | {{result.pubdate}}</span></div>
         <div>정가: {{ result.prices.0 }}</div>
         <div>바이백(최상): {{ result.prices.1 }} | 바이백(상): {{ result.prices.2 }} | 바이백(중): {{ result.prices.3 }}</div>
 

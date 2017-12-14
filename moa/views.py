@@ -9,7 +9,7 @@ from math import ceil
 from urllib.parse import quote
 
 
-# Create your views here.
+# Create your views here
 
 def soupify(base_url, page):
     """Make each page into BeautifulSoup object"""
@@ -32,6 +32,18 @@ def yes24_crawl(soup, resultset, page=1, items_per_page=20):
                 'ul.clearfix li:nth-of-type(' + str(i) + ') div.bbG_info a'
                 )
             title_v = title[0].get('title')
+            author = soup.select(
+                'div.bbGoodsList > ul > li:nth-of-type(' + str(i) + ') span.bbG_auth'
+                )
+            author_v = author[0].text
+            publisher = soup.select(
+                'div.bbGoodsList > ul > li:nth-of-type(' + str(i) + ') span.bbG_pub'
+                )
+            publisher_v = publisher[0].text
+            pubdate = soup.select(
+                'div.bbGoodsList > ul > li:nth-of-type(' + str(i) + ') span.bbG_date'
+                )
+            pubdate_v = pubdate[0].text
             prices = soup.select(
                 'ul.clearfix li:nth-of-type(' +str(i) + ') div.bbG_price td'
                 )
@@ -41,6 +53,9 @@ def yes24_crawl(soup, resultset, page=1, items_per_page=20):
             resultset.append({
                 'image':image_v,
                 'title':title_v,
+                'author':author_v,
+                'publisher':publisher_v,
+                'pubdate':pubdate_v,
                 'prices':prices_v,
                 'platform':'yes24',
                 'page':page,
@@ -58,12 +73,21 @@ def aladin_crawl(soup, resultset, page=1, items_per_page=10):
             image_v = image[i].get('src')
             title = soup.select('#searchResult td > a > strong')
             title_v = title[i].text
+            # author, publisher, pubdate는 한번에 처리
+            auth_and_pub = soup.select('#searchResult tr:nth-of-type(' + str(8*i+2) +') br')[0].find_all(text=True)
+            str_join = ''.join(auth_and_pub)
+            author_v = str_join[:str_join.index("|")-1]
+            publisher_v = auth_and_pub[-3]
+            pubdate_v = auth_and_pub[-2].lstrip(" | ")
             # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
             prices_v = list(map(lambda p:p.text, prices[4*i:4*(i+1)]))
 
             resultset.append({
                 'image':image_v,
                 'title':title_v,
+                'author':author_v,
+                'publisher':publisher_v,
+                'pubdate':pubdate_v,
                 'prices':prices_v,
                 'platform':'aladin',
                 'page':page,
@@ -79,7 +103,7 @@ def index(request):
 def result(request):
     query = request.GET.get('searchword')
 
-# yes24 크롤링 파트
+    # yes24 크롤링 파트
     yes24_resultset = []
 
     # yes24 바이백 기본 url 세팅
@@ -166,7 +190,6 @@ def result(request):
 
 ### 앞으로 할 일(BACK)
 # TODO: 결과가 없을 때 취할 모션은?
-# TODO: author, pubdate, publisher 추가로 크롤링
 # TODO: 향후 동일 책을 기준으로 알리딘 vs yes24 vs 인터파크로 보여줘야
 # TODO: 향후 interpark 중고도서 서비스 추가
 
@@ -176,6 +199,6 @@ def result(request):
 
 # TODO: 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법
 # TODO: 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
-# TODO: 프론트에서 ajax로 페이지네이션 구현
+## TODO: 프론트에서 ajax로 페이지네이션 구현
 
-# TODO: 프론트에 부트스트랩 적용
+#### TODO: 프론트에 부트스트랩 적용
