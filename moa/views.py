@@ -76,7 +76,7 @@ def aladin_crawl(soup, resultset, page=1, items_per_page=10):
             # author, publisher, pubdate는 한번에 처리
             auth_and_pub = soup.select('#searchResult tr:nth-of-type(' + str(8*i+2) +') br')[0].find_all(text=True)
             str_join = ''.join(auth_and_pub)
-            author_v = str_join[:str_join.index("|")-1]
+            author_v = str_join[:str_join.find("|")-1]
             publisher_v = auth_and_pub[-3]
             pubdate_v = auth_and_pub[-2].lstrip(" | ")
             # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
@@ -190,12 +190,13 @@ def result(request):
 
 ### 앞으로 할 일(BACK)
 # TODO: 결과가 없을 때 취할 모션은?
-# TODO: 향후 동일 책을 기준으로 알리딘 vs yes24 vs 인터파크로 보여줘야
+# TODO: 향후 동일 책을 기준으로 알리딘 vs yes24 vs 인터파크로 보여줘야 ---- 가성비 떨어지는듯
 # TODO: 향후 interpark 중고도서 서비스 추가
 
-# TODO: total_resultset 정렬 기준 고민 필요
+# TODO: total_resultset 정렬 기준 고민 필요 - 판매서점별 / 정확도순 / 가격순 / ?
 
-# TODO: 향후 DB에 저장해놓고 매일 자정에 DB 업데이트 하는 방향으로 개선?
+# TODO: 향후 DB에 저장해놓고 매일 자정에 DB 업데이트 하는 방향으로 개선? -- 노노
+# TODO: 브라우저 캐시 사용 고려
 
 # TODO: 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법
 # TODO: 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
@@ -204,4 +205,4 @@ def result(request):
 
 # TODO: admin 필요성 고민
 
-#### TODO: 프론트에 부트스트랩 적용
+# TODO: README 작성

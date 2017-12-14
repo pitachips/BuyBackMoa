@@ -24,38 +24,24 @@ body {
   line-height: 3rem;
 }
 
-/* Size the image */
+
+/* Main marketing message and sign up button */
+.jumbotron {
+  text-align: center;
+  border-bottom: .05rem solid #e5e5e5;
+}
 .display-3 {
-    padding-bottom: 4rem;
-}
-p.image-wrap {
-    height: 8rem;
-    margin-bottom: 10px;
-}
-.image-wrap .logo {
-    height: 80%;
-    margin: 0 10px;
+    margin-top: 0px;
 }
 
-/* Size the search form*/
-.form-search {
-  max-width: 550px;
-  padding: 10px;
-  margin: 0 auto;
+/*Buyback item list*/
+.buyback-item {
+    margin-top: 10px;
 }
-#searchbox {
+img.buyback-item{
     width: 60%;
-    margin-left: 5%;
+    max-width: 120px;
 }
-.btn-dark {
-    color: white;
-    background-color: #444;
-}
-.btn-dark:hover {
-    color: white;
-    background-color: #111;
-}
-
 
 /* Custom page footer */
 .footer {
@@ -64,29 +50,16 @@ p.image-wrap {
   border-top: .05rem solid #e5e5e5;
 }
 
+
 /* Customize container */
 @media (min-width: 48em) {
   .container {
     max-width: 86rem;
   }
 }
+
 .container-narrow > hr {
   margin: 2rem 0;
-}
-
-/* Main marketing message and sign up button */
-.jumbotron {
-  text-align: center;
-  border-bottom: .05rem solid #e5e5e5;
-}
-/*.jumbotron .btn {
-  padding: .75rem 1.5rem;
-  font-size: 1.5rem;
-}*/
-.form-inline .form-control {
-    display: inline-block;
-    width: 60%;
-    vertical-align: middle;
 }
 
 /* Responsive: Portrait tablets and up */
@@ -107,5 +80,8 @@ p.image-wrap {
   /* Remove the bottom border on the jumbotron for visual effect */
   .jumbotron {
     border-bottom: 0;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 }
+
