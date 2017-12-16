@@ -57,7 +57,59 @@
             <a class="page-link" href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.next_page_number }}">next</a>
         {% endif %}
       </div>
+
     </div>
+
+
+<script>
+$("#load-id").click(function(){
+    load_page(
+        "/search-result/",
+        "#pagination-id",
+        "#load-id",
+        "#pagediv-id",
+      );
+});
+
+
+
+function load_page(
+    page_url, paginationfield_id, loadbutton_id, pagediv_id,
+){
+    page = parseInt($(paginationfield_id).val());
+
+    $(loadbutton_id).prop("disabled", true);
+    $(loadbutton_id).text("Loading ...");
+
+    $.ajax({
+        async: true,
+        type: "GET",
+        url: page_url,
+        data: { page: page },
+        error: function() {
+                $(loadbutton_id).replaceWith("<p></p>");
+            },
+        success: function(data){ // check if there is an additional page
+                                // , disable load button if not
+                $.ajax({
+                    async: true,
+                    type: "HEAD",
+                    url: page_url,
+                    data: { page: page + 1 },
+                    error: function(data){
+                            $(loadbutton_id).replaceWith("<p>No more data</p>");
+                        },
+                    success: function(response){
+                            $(loadbutton_id).text("Load more");
+                            $(paginationfield_id).val(page + 1);
+                            $(loadbutton_id).prop("disabled", false);
+                        }
+                });
+                $(pagediv_id).append($(data).find("div"));
+            }
+    });
+}
+    </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>

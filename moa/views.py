@@ -1,6 +1,8 @@
+import json
 import re
 import requests
 
+from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 
@@ -61,7 +63,7 @@ def yes24_crawl(soup, resultset, page=1, items_per_page=20):
                 'page':page,
                 })
     except IndexError:
-        pass
+        print("인덱스 에러!")
 
 
 def aladin_crawl(soup, resultset, page=1, items_per_page=10):
@@ -103,80 +105,99 @@ def index(request):
 def result(request):
     query = request.GET.get('searchword')
 
-    # yes24 크롤링 파트
-    yes24_resultset = []
+    key = query.replace(" ",".")
+    content_j = cache.get(key)
 
     # yes24 바이백 기본 url 세팅
-    # yes24도 euc-kr로 인코딩 가능. 단 url 상에는 utf-16-be 인코딩으로 나타나서 혼란 유발..
     yes24_base_url = 'http://www.yes24.com/Mall/buyback/Search' \
         '?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y' \
         '&SearchWord=' + quote(query, encoding="euc-kr") + '&pageIndex='
-    yes24_soup = soupify(yes24_base_url, 1)
-
-    yes24_result_count_wrap = yes24_soup.select(
-        'div.rstTxt > h3 > strong:nth-of-type(2)'
-    )
-    if yes24_result_count_wrap:
-        yes24_result_count = int(re.search(r'\d+', yes24_result_count_wrap[0].text)[0])
-        if yes24_result_count > 100:
-            context = {
-                'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요"
-            }
-            return render(request, 'moa/index.html', context)
-        else:
-            num_pages = ceil(yes24_result_count/20)
-            yes24_crawl(yes24_soup, yes24_resultset)
-            for page in range(2, num_pages):
-                yes24_soup = soupify(yes24_base_url, page)
-                yes24_crawl(yes24_soup, yes24_resultset, page)
-    else:
-        # 검색 결과 없음
-        pass
-
-
-#aladin 크롤링 파트
-    aladin_resultset = []
-
-    # aladin 바이백 기본 url 세팅
     aladin_base_url = 'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx' \
         '?ActionType=1&SearchTarget=Book&x=0&y=0' \
         '&KeyWord=' + quote(query, encoding="euc-kr") + '&page='
-    aladin_soup = soupify(aladin_base_url, 1)
 
-    aladin_result_count_wrap = aladin_soup.select(
-        '#pnItemList > table:nth-of-type(1) > tr > td:nth-of-type(1) > strong'
+    if content_j is None:
+        print('캐시가 없어서 루프 시작')
+        # yes24 크롤링 파트
+        yes24_resultset = []
+
+        # yes24 바이백 기본 url 세팅
+        yes24_base_url = 'http://www.yes24.com/Mall/buyback/Search' \
+            '?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y' \
+            '&SearchWord=' + quote(query, encoding="euc-kr") + '&pageIndex='
+        yes24_soup = soupify(yes24_base_url, 1)
+        yes24_result_count_wrap = yes24_soup.select(
+            'div.rstTxt > h3 > strong:nth-of-type(2)'
         )
-    if aladin_result_count_wrap:
-        aladin_result_count = int(re.search(r'\d+', aladin_result_count_wrap[0].text)[0])
-        if aladin_result_count > 200:
-            context = {
-                'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요"
-            }
-            return render(request, 'moa/index.html', context)
+        if yes24_result_count_wrap:
+            # 검색 결과 있음
+            yes24_result_count = int(re.search(r'\d+', yes24_result_count_wrap[0].text)[0])
+            if yes24_result_count > 100:
+                context = {
+                    'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요"
+                }
+                return render(request, 'moa/index.html', context)
+            else:
+                num_pages = ceil(yes24_result_count/20)
+                yes24_crawl(yes24_soup, yes24_resultset)
+                for page in range(2, num_pages):
+                    yes24_soup = soupify(yes24_base_url, page)
+                    yes24_crawl(yes24_soup, yes24_resultset, page)
         else:
-            num_pages = ceil(aladin_result_count/10)
-            aladin_crawl(aladin_soup, aladin_resultset)
-            for page in range(2, num_pages):
-                aladin_soup = soupify(aladin_base_url, page)
-                aladin_crawl(aladin_soup, aladin_resultset, page)
-    else:
-        #검색결과 없음
-        pass
+            # 검색 결과 없음
+            pass
 
+        #aladin 크롤링 파트
+        aladin_resultset = []
 
-# page번호 순서대로 정렬
-    total_resultset = yes24_resultset + aladin_resultset
-    total_resultset = sorted(total_resultset, key=lambda rs : rs['page'])
+        # aladin 바이백 기본 url 세팅
+        aladin_base_url = 'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx' \
+            '?ActionType=1&SearchTarget=Book&x=0&y=0' \
+            '&KeyWord=' + quote(query, encoding="euc-kr") + '&page='
+        aladin_soup = soupify(aladin_base_url, 1)
 
-# pagination 하여 뿌리기
+        aladin_result_count_wrap = aladin_soup.select(
+            '#pnItemList > table:nth-of-type(1) > tr > td:nth-of-type(1) > strong'
+            )
+        if aladin_result_count_wrap:
+            # 검색 결과 있음
+            aladin_result_count = int(re.search(r'\d+', aladin_result_count_wrap[0].text)[0])
+            if aladin_result_count > 200:
+                context = {
+                    'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요"
+                }
+                return render(request, 'moa/index.html', context)
+            else:
+                num_pages = ceil(aladin_result_count/10)
+                aladin_crawl(aladin_soup, aladin_resultset)
+                for page in range(2, num_pages):
+                    aladin_soup = soupify(aladin_base_url, page)
+                    aladin_crawl(aladin_soup, aladin_resultset, page)
+        else:
+            # 검색 결과 없음
+            pass
+
+        # page번호 순서대로 정렬된 total_resultset 만들기
+        total_resultset = yes24_resultset + aladin_resultset
+        total_resultset = sorted(total_resultset, key=lambda rs : rs['page'])
+        content_j = json.dumps(total_resultset)
+        cache.set(key, content_j, 60*5)
+        print('if블록 종료 직전 캐시를 content j로 세팅함')
+
+    # pagination 하여 뿌리기
     page = request.GET.get('page')
-    pagniator = Paginator(total_resultset, 20)
+    content = json.loads(content_j)
+    paginator = Paginator(content, 20)
     try:
-        total_resultset_paged = pagniator.page(page)
+        total_resultset_paged = paginator.page(page)
+        print('페이지가 있는 경우', page)
     except PageNotAnInteger:
-        total_resultset_paged = pagniator.page(1)
+        total_resultset_paged = paginator.page(1)
+        print('not integer라고 하네..')
     except EmptyPage:
-        total_resultset_paged = paginator.page(pagniator.num_pages)
+        total_resultset_paged = paginator.page(paginator.num_pages)
+        print('페이지 오바', paginator.num_pages)
+
 
     context = {
         'total_resultset_paged': total_resultset_paged,
@@ -190,19 +211,21 @@ def result(request):
 
 ### 앞으로 할 일(BACK)
 # TODO: 결과가 없을 때 취할 모션은?
-# TODO: 향후 동일 책을 기준으로 알리딘 vs yes24 vs 인터파크로 보여줘야 ---- 가성비 떨어지는듯
 # TODO: 향후 interpark 중고도서 서비스 추가
 
 # TODO: total_resultset 정렬 기준 고민 필요 - 판매서점별 / 정확도순 / 가격순 / ?
 
-# TODO: 향후 DB에 저장해놓고 매일 자정에 DB 업데이트 하는 방향으로 개선? -- 노노
-# TODO: 브라우저 캐시 사용 고려
+# TODO: 캐시 종류를 공부해서 알맞은 캐시 찾기 settings에 반영. Memcached가 적정해보임.
 
-# TODO: 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법
-# TODO: 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
-## TODO: 프론트에서 ajax로 페이지네이션 구현?
-## TODO: 여러번 긁어오는거 절대 안됨
+# TODO: 정확도가 높은 각 사이트별 50개 자료만 보여준다고 양해문구 삽입하는 것도 방법.
+
+### TODO: 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
+##### TODO: 프론트에서 ajax로 페이지네이션 구현?
+
+# TODO: 전면적 리팩토링 필요(기준: 가독성, 검색속도, cpu자원`)
 
 # TODO: admin 필요성 고민
+
+# TODO: 크롤링된 내용 일부를 박싱하고 한번에 훑는 걸로
 
 # TODO: README 작성
