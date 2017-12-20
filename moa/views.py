@@ -1,13 +1,13 @@
-from itertools import chain
 import json
+
+from itertools import chain
 from urllib.parse import quote
 
 from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 
-from .crawlers import yes24_base_url, aladin_base_url, yes24_check_and_crawl, aladin_check_and_crawl
-from .soupify import soupify
+from .crawlers import Yes24Crawl, AladinCrawl, yes24_base_url, aladin_base_url
 
 # Create your views here
 
@@ -21,30 +21,24 @@ def result(request):
     key = query.replace(" ",".")
     content_j = cache.get(key)
     if content_j is None:
-        # yes24 크롤링
-        yes24_resultset = yes24_check_and_crawl(query)
-        if yes24_resultset == "too much":
-            return render(request, 'moa/index.html', context={
-                'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요",
-            })
-        # aladin 크롤링
-        aladin_resultset = aladin_check_and_crawl(query)
-        if aladin_resultset == "too much":
-            return render(request, 'moa/index.html', context={
-                'advice':"결과가 너무 많습니다. 보다 구체적으로 검색해 주세요",
-            })
+        # yes24 크롤링 결과
+        yes24_crawler = Yes24Crawl()
+        yes24_resultset = yes24_crawler(query)
+        # aladin 크롤링 결과
+        aladin_crawler = AladinCrawl()
+        aladin_resultset = aladin_crawler(query)
         # yes24 및 aladin 모두 검색 결과가 없는 경우
         if yes24_resultset is None and aladin_resultset is None:
             return render(request, 'moa/index.html', context={
                 'advice':"검색 결과 0건",
             })
         # page번호 순서대로 정렬된 total_resultset 만들기
-        total_resultset = chain(yes24_resultset, aladin_resultset)
+        total_resultset = list(yes24_resultset) + list(aladin_resultset)
         total_resultset = sorted(total_resultset, key=lambda rs : rs['page'])
         # 캐시에 저장
         content_j = json.dumps(total_resultset)
-
         cache.set(key, content_j, 60*5)
+
     # 페이지네이션
     page = request.GET.get('page')
     content = json.loads(content_j)
@@ -63,6 +57,7 @@ def result(request):
         'aladin_url': aladin_base_url + quote(query, encoding="euc-kr") + '&page=',
     }
     return render(request, 'moa/search_result.html', context)
+
 
 
 ### 앞으로 할 일(BACK)
