@@ -2,21 +2,17 @@ from .soupify import soupify
 from math import ceil
 import re
 
-# TODO: 크롤링된 내용 일부를 박싱하고 한번에 훑는 걸로 변경
-
-
 
 ##### yes24 크롤러 #####
 
 yes24_base_url = 'http://www.yes24.com/Mall/buyback/Search' \
-        '?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y' \
-        '&SearchWord='
+    '?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y' \
+    '&SearchWord='
 
 def yes24_crawl(soup, query, num_pages):
     """Crawl until the end of list in yes24"""
-    yes24_resultset = []
     cur_page = 1
-    while cur_page <= num_pages:
+    while True:
         for tag in soup.select(".bbGoodsList ul.clearfix li"):
             image_v = tag.select('div.bbG_img img')[0].get('src')
             title_v = tag.select('div.bbG_info a')[0].get('title')
@@ -26,8 +22,7 @@ def yes24_crawl(soup, query, num_pages):
             prices = tag.select('div.bbG_price td')
             # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
             prices_v = list(map(lambda p:p.text, prices))
-
-            yes24_resultset.append({
+            yield {
                 'image':image_v,
                 'title':title_v,
                 'author':author_v,
@@ -36,27 +31,26 @@ def yes24_crawl(soup, query, num_pages):
                 'prices':prices_v,
                 'platform':'yes24',
                 'page':cur_page,
-                })
+            }
         cur_page += 1
+        if cur_page > num_pages:
+            break
         soup = soupify('yes24', yes24_base_url, query, cur_page)
-    return yes24_resultset
 
 
 def yes24_check_and_crawl(query):
-    yes24_soup = soupify('yes24', yes24_base_url, query, 1)
-    yes24_result_count_wrap = yes24_soup.select(
-            'div.rstTxt > h3 > strong:nth-of-type(2)'
-        )
-    if yes24_result_count_wrap:
+    soup = soupify('yes24', yes24_base_url, query, 1)
+    result_count = soup.select('div.rstTxt > h3 > strong:nth-of-type(2)')[0].text
+    if result_count:
         # yes24 검색 결과 건수에 따른 분기
-        yes24_result_count = int(re.search(r'\d+', yes24_result_count_wrap[0].text)[0])
-        if yes24_result_count > 150:
+        result_count = int(re.search(r'\d+', result_count)[0])
+        if result_count > 150:
             # 150건 초과
             return "too much"
         else:
             # 1건 이상 150건 이하
-            num_pages = ceil(yes24_result_count/20)
-            return yes24_crawl(yes24_soup, query, num_pages)
+            num_pages = ceil(result_count/20)
+            return yes24_crawl(soup, query, num_pages)
     else:
         return None   # 0건의 검색 결과
 
@@ -71,9 +65,9 @@ aladin_base_url = 'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx' \
 
 def aladin_crawl(soup, query, num_pages):
     """Crawl until the end of list in aladin"""
-    aladin_resultset = []
+    # aladin_resultset = []
     cur_page = 1
-    while cur_page <= num_pages:
+    while True:
         items = soup.select('#searchResult > tr')
         tags = (t for t in items if items.index(t)%2==0)
         for tag in tags:
@@ -87,7 +81,7 @@ def aladin_crawl(soup, query, num_pages):
             pubdate_v = pubdate.lstrip(" | ")
             # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
             prices_v = list(p.text for p in tag.select('.c2b_tablet3'))
-            aladin_resultset.append({
+            yield {
                 'image':image_v,
                 'title':title_v,
                 'author':author_v,
@@ -96,26 +90,25 @@ def aladin_crawl(soup, query, num_pages):
                 'prices':prices_v,
                 'platform':'aladin',
                 'page':cur_page,
-                })
+            }
         cur_page += 1
+        if cur_page > num_pages:
+            break
         soup = soupify('aladin', aladin_base_url, query, cur_page)
-    return aladin_resultset
 
 
 def aladin_check_and_crawl(query):
-    aladin_soup = soupify('aladin', aladin_base_url, query, 1)
-    aladin_result_count_wrap = aladin_soup.select(
-            '#pnItemList > table:nth-of-type(1) > tr > td:nth-of-type(1) > strong'
-        )
-    if aladin_result_count_wrap:
+    soup = soupify('aladin', aladin_base_url, query, 1)
+    result_count = soup.select('#pnItemList > table strong')[1].text
+    if result_count:
         # aladin 검색 결과 건수에 따른 분기
-        aladin_result_count = int(re.search(r'\d+', aladin_result_count_wrap[0].text)[0])
-        if aladin_result_count > 200:
+        result_count = int(re.search(r'\d+', result_count)[0])
+        if result_count > 200:
             # 200건 초과
             return "too much"
         else:
             # 1건 이상 200건 이하
-            num_pages = ceil(aladin_result_count/10)
-            return aladin_crawl(aladin_soup, query, num_pages)
+            num_pages = ceil(result_count/10)
+            return aladin_crawl(soup, query, num_pages)
     else:
         return None  # 0건의 검색 결과

@@ -1,9 +1,10 @@
+from itertools import chain
 import json
+from urllib.parse import quote
 
 from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
-from urllib.parse import quote
 
 from .crawlers import yes24_base_url, aladin_base_url, yes24_check_and_crawl, aladin_check_and_crawl
 from .soupify import soupify
@@ -38,12 +39,12 @@ def result(request):
                 'advice':"검색 결과 0건",
             })
         # page번호 순서대로 정렬된 total_resultset 만들기
-        total_resultset = yes24_resultset + aladin_resultset
+        total_resultset = chain(yes24_resultset, aladin_resultset)
         total_resultset = sorted(total_resultset, key=lambda rs : rs['page'])
         # 캐시에 저장
         content_j = json.dumps(total_resultset)
-        cache.set(key, content_j, 60*5)
 
+        cache.set(key, content_j, 60*5)
     # 페이지네이션
     page = request.GET.get('page')
     content = json.loads(content_j)
