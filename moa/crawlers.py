@@ -3,25 +3,20 @@ import requests
 
 from bs4 import BeautifulSoup
 from math import ceil
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 
-yes24_base_url = 'http://www.yes24.com/Mall/buyback/Search' \
-    '?CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y' \
-    '&SearchWord='
-
-aladin_base_url = 'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx' \
-    '?ActionType=1&SearchTarget=Book&x=0&y=0' \
-    '&KeyWord='
+yes24_base_url = 'http://www.yes24.co.kr/Mall/buyback/Search'
+aladin_base_url = 'http://www.aladin.co.kr/shop/usedshop/wc2b_search.aspx'
 
 
 class Crawl(object):
-    def get_url(self, query, page):
+    def get_response(self, query, page):
         raise NotImplementedError
 
-    def get_soup(self, url):
+    def get_soup(self, response):
         """Make each page into BeautifulSoup object"""
-        html = requests.get(url).text
+        html = response.text
         soup = BeautifulSoup(html, 'html.parser')
         return soup
 
@@ -41,7 +36,8 @@ class Crawl(object):
 
     def __call__(self, query):
         cur_page = 1
-        soup = self.get_soup(self.get_url(query, cur_page))
+        response = self.get_response(query, cur_page)
+        soup = self.get_soup(response)
         num_pages = self.check_num_pages(soup)
         if num_pages is None:
             return None
@@ -52,12 +48,27 @@ class Crawl(object):
 
 class Yes24Crawl(Crawl):
     def __init__(self):
-        self.base_url = yes24_base_url
         self.items_per_page = 20
+        # self.link = ''
 
-    def get_url(self, query, page):
-        url = self.base_url + quote(query, encoding="euc-kr") + '&pageIndex=' + str(page)
-        return url
+    def get_response(self, query, page):
+        url = yes24_base_url + '?SearchWord=' + quote(query, encoding='euc-kr')
+        # params에 넣으면 인코딩문제 발생.. 해결 필요
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+            'Referer': 'http://www.yes24.co.kr/Mall/BuyBack/Search?CategoryNumber=018',
+        }
+        params = {
+            'CategoryNumber': '018',
+            'SearchDomain': 'BOOK',  # 국내도서
+            'BuybackAccept': 'Y',
+            'pageIndex': page,
+        }
+        self.link = url+'&'+urlencode(params)
+
+        response = requests.get(url, headers=headers, params=params)
+        return response
 
     def get_result_count(self, soup):
         result_count = soup.select('div.rstTxt > h3 > strong:nth-of-type(2)')
@@ -87,21 +98,35 @@ class Yes24Crawl(Crawl):
                     'prices':prices_v,
                     'platform':'yes24',
                     'page':cur_page,
+                    'link':self.link,
                 }
             cur_page += 1
             if cur_page > num_pages:
                 break
-            soup = self.get_soup(self.get_url(query, cur_page))
+            soup = self.get_soup(self.get_response(query, cur_page))
 
 
 class AladinCrawl(Crawl):
     def __init__(self):
-        self.base_url = aladin_base_url
+        # self.base_url = aladin_base_url
         self.items_per_page = 10
 
-    def get_url(self, query, page):
-        url = self.base_url + quote(query, encoding="euc-kr") + '&page=' + str(page)
-        return url
+    def get_response(self, query, page):
+        url = aladin_base_url + '?KeyWord=' + quote(query, encoding="euc-kr")
+        # params에 넣으면 인코딩문제 발생.. 해결 필요
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+            'Referer': 'http://www.aladin.co.kr/shop/usedshop/wc2b_gate.aspx',
+        }
+        params = {
+           'ActionType': 1,
+           'SearchTarget': 'Book',   # 국내도서
+           'page': page,
+        }
+        self.link = url+'&'+urlencode(params)
+        response = requests.get(url, headers=headers, params=params)
+        return response
 
     def get_result_count(self, soup):
         result_count = soup.select('#pnItemList > table strong')
@@ -118,6 +143,7 @@ class AladinCrawl(Crawl):
             for tag in tags:
                 image_v = tag.select('td img')[0].get('src')
                 title_v = tag.select('td > a > strong')[0].text
+                # link =
                 # author, publisher, pubdate는 한번에 처리
                 pubinfo = tag.select('td')[3].find_all(text=True)[:-1]
                 pubinfo = pubinfo[3:] if pubinfo[2].startswith(' -') else pubinfo[2:]
@@ -135,8 +161,9 @@ class AladinCrawl(Crawl):
                     'prices':prices_v,
                     'platform':'aladin',
                     'page':cur_page,
+                    'link':self.link,
                 }
             cur_page += 1
             if cur_page > num_pages:
                 break
-            soup = self.get_soup(self.get_url(query, cur_page))
+            soup = self.get_soup(self.get_response(query, cur_page))

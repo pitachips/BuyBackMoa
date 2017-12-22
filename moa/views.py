@@ -37,7 +37,7 @@ def result(request):
             total_resultset = yes24_resultset or aladin_resultset
 
         # ajax 처리 필요
-        rs = tuple(islice(total_resultset, 20))
+        rs = tuple(islice(total_resultset, 50))
 
         # total_resultset = list(yes24_resultset) + list(aladin_resultset)
         # total_resultset = sorted(total_resultset, key=lambda rs : rs['page'])
@@ -59,9 +59,8 @@ def result(request):
     # 렌더하기
     context = {
         'total_resultset_paged': total_resultset_paged,
-        'yes24_url': yes24_base_url + quote(query, encoding="euc-kr") + '&pageIndex=',
-        'aladin_url': aladin_base_url + quote(query, encoding="euc-kr") + '&page=',
-        'range': range(10),
+        'yes24_url': yes24_base_url + quote(query, encoding="euc-kr") ,
+        'aladin_url': aladin_base_url + quote(query, encoding="euc-kr"),
     }
     print('탈출', datetime.datetime.now())
     return render(request, 'moa/search_result.html', context)

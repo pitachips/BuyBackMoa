@@ -37,11 +37,7 @@
           <h3 class="buyback-item"> {{ result.title }}</h3>
           <p>{{ result.author }} | {{ result.publisher }} | {{ result.pubdate }}</p>
           <p>정가: {{ result.prices.0 }} | 바이백(최상): {{ result.prices.1 }} | 바이백(상): {{ result.prices.2 }} | 바이백(중): {{ result.prices.3 }}</p>
-          {% if result.platform == "yes24" %}
-          <a class="btn btn-success" href="{{ yes24_url }}{{ result.page }}" target="_blank">{{ result.platform }}에서 팔기</a>
-          {% elif result.platform == "aladin" %}
-          <a class="btn btn-success" href="{{ aladin_url }}{{ result.page }}" target="_blank">{{ result.platform }}에서 팔기</a>
-          {% endif %}
+          <a class="btn btn-success" href="{{ result.link }}" target="_blank">{{ result.platform }}에서 팔기</a>
         </div>
       </div>
       <hr />
