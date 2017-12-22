@@ -14,14 +14,14 @@ aladin_base_url = 'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx' \
     '?ActionType=1&SearchTarget=Book&x=0&y=0' \
     '&KeyWord='
 
+
 class Crawl(object):
     def get_url(self, query, page):
         raise NotImplementedError
 
     def get_soup(self, url):
         """Make each page into BeautifulSoup object"""
-        req = requests.get(url)
-        html = req.text
+        html = requests.get(url).text
         soup = BeautifulSoup(html, 'html.parser')
         return soup
 
@@ -32,7 +32,6 @@ class Crawl(object):
         result_count = self.get_result_count(soup)
         if result_count:
             result_count = int(re.search(r'\d+', result_count)[0])
-            print('리절트 카운트', result_count)
             return ceil(result_count/self.items_per_page)
         else:
             return None   # 0건의 검색 결과
@@ -47,6 +46,7 @@ class Crawl(object):
         if num_pages is None:
             return None
         rs = self.crawl(soup, query, cur_page, num_pages)
+        print("확인용")
         return rs
 
 
