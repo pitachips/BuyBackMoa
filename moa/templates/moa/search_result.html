@@ -1,3 +1,4 @@
+{%extends 'moa/index.html' %}
 {% load staticfiles %}
 
 <!DOCTYPE html>
@@ -8,21 +9,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="pita" />
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    {% block head %}
     <link href="{% static 'css/search_result.css' %}" rel="stylesheet" />
     <title>바이백 모아</title>
+    {% endblock %}
 </head>
 
 <body>
     <div class="container">
       <header class="header clearfix">
-        <h3 class="text-muted">바이백 모아</h3>
+        <h3 class="text-muted"><a href="{% url 'index' %}">바이백 모아</a></h3>
       </header>
 
-      <h4>{{range.next}}</h4>
+      {% block main %}
 
       <div class="jumbotron">
         <h3 class="display-3">중고책 매입가 검색</h3>
-        <form class="form-search form-inline" method="GET" action="/search-result/" role="search">
+        <form class="form-search form-inline" method="GET" action="{% url 'result' %}" role="search">
           <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" />
           <input class="btn btn-dark" type="submit" />
         </form>
@@ -58,6 +61,12 @@
 
     </div>
 
+    {% endblock %}
+
+
+
+
+<!--
 
 <script>
 $("#load-id").click(function(){
@@ -108,7 +117,7 @@ function load_page(
     });
 }
     </script>
-
+ -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>

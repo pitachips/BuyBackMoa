@@ -1,7 +1,6 @@
 import json
 import datetime
 
-
 from itertools import chain, islice
 from urllib.parse import quote
 

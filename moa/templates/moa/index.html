@@ -8,29 +8,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="author" content="pita" />
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    {% block head %}
     <link href="{% static 'css/index.css' %}" rel="stylesheet" />
     <title>바이백 모아</title>
+    {% endblock %}
   </head>
 
 
   <body>
     <div class="container">
       <header class="header clearfix">
-        <!--<nav>
-          <ul class="nav nav-pills float-right">
-            <li class="nav-item">
-              <a class="nav-link active" href="#">Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Contact</a>
-            </li>
-          </ul>
-        </nav> -->
-        <h3 class="text-muted">바이백 모아</h3>
+        <a id="to-home" href="{% url 'index' %}"><h3 class="text-muted">바이백 모아</h3></a>
       </header>
+
+      {% block main %}
 
       <main role="main">
         <div class="jumbotron">
@@ -39,7 +30,7 @@
           <p class="image-wrap">
             <img class="logo" src="{% static 'image/yes24_logo.png' %}" /><img class="logo" src="{% static 'image/aladin_logo.png' %}" />
           </p>
-          <form class="form-search form-inline" method="GET" action="/search-result/" role="search">
+          <form class="form-search form-inline" method="GET" action="{% url 'result' %}" role="search">
             <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" required autofocus />
             <input class="btn btn-dark" type="submit" />
           </form>
@@ -47,6 +38,8 @@
           {% if advice %}<p>{{ advice }}</p>{% endif %}
         </div>
       </main>
+
+      {% endblock %}
 
       <footer class="footer">
         <p>&copy; pitachips 2017</p>

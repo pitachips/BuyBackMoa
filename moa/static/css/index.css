@@ -24,6 +24,11 @@ body {
   line-height: 3rem;
 }
 
+/* to-home button */
+#to-home:hover {
+  text-decoration: none;
+}
+
 /* Size the image */
 .display-3 {
     padding-bottom: 4rem;
@@ -109,3 +114,5 @@ p.image-wrap {
     border-bottom: 0;
   }
 }
+
+
