@@ -24,6 +24,10 @@ body {
   line-height: 3rem;
 }
 
+/* to-home button */
+#to-home:hover {
+  text-decoration: none;
+}
 
 /* Main marketing message and sign up button */
 .jumbotron {
@@ -49,7 +53,6 @@ img.buyback-item{
   color: #777;
   border-top: .05rem solid #e5e5e5;
 }
-
 
 /* Customize container */
 @media (min-width: 48em) {
