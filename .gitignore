@@ -31,3 +31,7 @@ docs/_build/
 
 # secret keys
 secret.py
+
+
+# idea
+.idea/

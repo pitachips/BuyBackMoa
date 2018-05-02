@@ -1,16 +1,15 @@
 import json
-import datetime
 
-from itertools import chain, islice
+from itertools import zip_longest
 from urllib.parse import quote
 
 from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 
-from .crawlers import Yes24Crawl, AladinCrawl, yes24_base_url, aladin_base_url
-
-# Create your views here
+from concurrent import futures
+import time
+from .crawlers import crawl_yes24, crawl_aladin, yes24_base_url, aladin_base_url
 
 
 def index(request):
@@ -18,35 +17,32 @@ def index(request):
 
 
 def result(request):
-    print('진입', datetime.datetime.now())
+    t1 = time.time()
+
     query = request.GET.get('searchword')
-    key = query.replace(" ",".")
+    total_resultset = []
+    key = query.strip().replace(" ",".")
     content_j = cache.get(key)
+
     if content_j is None:
-        yes24_resultset = Yes24Crawl()(query)
-        aladin_resultset = AladinCrawl()(query)
+        with futures.ThreadPoolExecutor(max_workers=6) as exe:
+            fs = tuple(filter(None, sum(zip_longest([exe.submit(crawl_aladin, query, page) for page in range(1, 6)],
+                                                    [exe.submit(crawl_yes24, query, page) for page in range(1, 4)]), ())))
+            # for f in futures.as_completed(fs, timeout=4):
+            #     total_resultset += f.result()
+            done, undone = futures.wait(fs, timeout=3)
+            if undone:
+                for f in undone:
+                    print(f'{f} is cancelled')
+                    f.cancel()
+            for f in done:
+                total_resultset += f.result()
 
-        if yes24_resultset and aladin_resultset:
-            total_resultset = chain(yes24_resultset, aladin_resultset)
-        elif yes24_resultset is None and aladin_resultset is None:
-            return render(request, 'moa/index.html', context={
-                'advice':"검색 결과 0건",
-            })
-        else:
-            total_resultset = yes24_resultset or aladin_resultset
-
-        # ajax 처리 필요
-        rs = tuple(islice(total_resultset, 50))
-
-        # total_resultset = list(yes24_resultset) + list(aladin_resultset)
-        # total_resultset = sorted(total_resultset, key=lambda rs : rs['page'])
-        # 캐시에 저장
-        content_j = json.dumps(rs)
+        content_j = json.dumps(total_resultset)
         cache.set(key, content_j, 60*5)
-
-    # 페이지네이션
-    page = request.GET.get('page')
     content = json.loads(content_j)
+
+    page = request.GET.get('page')
     paginator = Paginator(content, 20)
     try:
         total_resultset_paged = paginator.page(page)
@@ -55,24 +51,24 @@ def result(request):
     except EmptyPage:
         total_resultset_paged = paginator.page(paginator.num_pages)
 
-    # 렌더하기
     context = {
         'total_resultset_paged': total_resultset_paged,
         'yes24_url': yes24_base_url + quote(query, encoding="euc-kr") ,
         'aladin_url': aladin_base_url + quote(query, encoding="euc-kr"),
     }
-    print('탈출', datetime.datetime.now())
+    print(time.time()-t1, '초, 총 소요시간')
+
     return render(request, 'moa/search_result.html', context)
 
 
 
 ### 앞으로 할 일(BACK)
-# TODO: 결과가 없을 때 취할 모션은?
-# TODO: 향후 interpark 중고도서 서비스 추가
 # TODO: total_resultset 정렬 기준 고민 필요 - 판매서점별 / 정확도순 / 가격순 / ?
 # TODO: 캐시 종류를 공부해서 알맞은 캐시 찾기 settings에 반영. Memcached가 적정해보임.
-### TODO: 알라딘과 yes24를 병렬적으로 크롤링 하도록 구성
-##### TODO: 프론트에서 ajax로 페이지네이션 구현?
-# TODO: 첫번째 페이지 로딩 속도를 빠르게 하기 위한 방법 모색
+# TODO: 프론트에서 ajax로 페이지네이션 구현?
+# TODO: 프론트에서 알라딘 vs yes24로 2단 구성하기
+# TODO: 로딩 되는 동안 뱅글뱅글 돌아가는 이미지
+# TODO: 서빙을 async 하게 할 필요 있음 aiohttp 모듈 참고하기
+# TODO: 첫번째 페이지 로딩 속도를 빠르게 하기 위한 방법 모색 - 뷰티풀숩 텍스트 서칭 속드를 개선?
 # TODO: admin 필요성 고민
 # TODO: README 작성

@@ -20,5 +20,5 @@ from moa import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index, name='index'),
-    url(r'^search-result/', views.result, name='result'),
+    url(r'^result/', views.result, name='result'),
 ]
