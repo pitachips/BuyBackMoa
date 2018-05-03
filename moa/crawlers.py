@@ -6,7 +6,7 @@ from urllib.request import Request, urlopen
 
 
 yes24_base_url = 'http://www.yes24.co.kr/Mall/buyback/Search'
-aladin_base_url = 'http://www.aladin.co.kr/shop/usedshop/wc2b_search.aspx'
+aladin_base_url = 'http://used.aladin.co.kr/shop/usedshop/wc2b_search.aspx'
 
 
 def select_yes24(soup, page, link):
@@ -70,7 +70,6 @@ def select_aladin(soup, page, link):
 
 def crawl_yes24(searchword, page):
     url = yes24_base_url + '?SearchWord=' + quote(searchword, encoding='euc-kr')
-
     # params에 넣으면 인코딩문제 발생.. 해결 필요
 
     headers = {
@@ -93,8 +92,6 @@ def crawl_yes24(searchword, page):
 
 def crawl_aladin(searchword, page):
     url = aladin_base_url + '?KeyWord=' + quote(searchword, encoding="euc-kr") + '&ActionType=1&SearchTarget=Book&page='
-    # params에 넣으면 인코딩문제 발생.. 해결 필요
-
     headers = {
         'User-Agent':'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
         'Referer':url + str(page-1),
@@ -110,7 +107,7 @@ def crawl_aladin(searchword, page):
     response = urlopen(req)
     # response = urlopen(url)  ## 헤더 다 필요없이 그냥 보내기
     html = response.read().decode('euc-kr')
-    soup = BeautifulSoup(response, 'html.parser')
+    soup = BeautifulSoup(html, 'html.parser')
     item = select_aladin(soup, page, response.url)
     return item
 
