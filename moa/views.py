@@ -1,14 +1,11 @@
 import json
-
+import time
+from concurrent import futures
 from itertools import zip_longest
 from urllib.parse import quote
-
 from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
-
-from concurrent import futures
-import time
 from .crawlers import crawl_yes24, crawl_aladin, yes24_base_url, aladin_base_url
 
 
@@ -56,7 +53,7 @@ def result(request):
         'yes24_url': yes24_base_url + quote(query, encoding="euc-kr") ,
         'aladin_url': aladin_base_url + quote(query, encoding="euc-kr"),
     }
-    print(time.time()-t1, '초, 총 소요시간')
+    # print(time.time()-t1, '초, 총 소요시간')
 
     return render(request, 'moa/search_result.html', context)
 

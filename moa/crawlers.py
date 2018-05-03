@@ -1,5 +1,4 @@
 import requests
-
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 from urllib.request import Request, urlopen
