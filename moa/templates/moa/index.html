@@ -1,6 +1,5 @@
 {% load staticfiles %}
 
-
 <!doctype html>
 <html lang="en">
   <head>
@@ -13,7 +12,6 @@
     <title>바이백 모아</title>
     {% endblock %}
   </head>
-
 
   <body>
     <div class="container">
@@ -34,7 +32,6 @@
             <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" required autofocus />
             <input class="btn btn-dark" type="submit" />
           </form>
-
           {% if advice %}<p>{{ advice }}</p>{% endif %}
         </div>
       </main>

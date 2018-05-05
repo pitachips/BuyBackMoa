@@ -30,7 +30,7 @@ docs/_build/
 
 
 # secret keys
-secret.py
+secret.json
 
 
 # idea
