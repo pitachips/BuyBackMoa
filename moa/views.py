@@ -29,7 +29,6 @@ def result(request):
             done, undone = futures.wait(fs, timeout=3)
             if undone:
                 for f in undone:
-                    print(f'{f} is cancelled')
                     f.cancel()
             for f in done:
                 total_resultset += f.result()
