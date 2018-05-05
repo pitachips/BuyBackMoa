@@ -42,7 +42,6 @@ def select_aladin(soup, page, link):
     for tag in tags:
         image_v = tag.select('td img')[0].get('src')
         title_v = tag.select('td > a > strong')[0].text
-        # link =
         # author, publisher, pubdate는 한번에 처리
         pubinfo = tag.select('td')[3].find_all(text=True)[:-1]
         pubinfo = pubinfo[3:] if pubinfo[2].startswith(' -') else pubinfo[2:]
