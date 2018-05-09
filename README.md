@@ -19,3 +19,5 @@ yes24, aladin 온라인 서점에서 매입하는 중고책 바이백 가격 비
 - CI 도입, test 연계
 - README 앞으로 할 일 vs 깃허브 이슈 관리
 - /favicon.ico 설정
+- Flask로 이사하기? DB 전혀 안 쓸거라면 Flask로 빨리가자. (최대한 django 의존성 줄여야)
+- 404, 400, 500 등 http 상태 페이지 템플릿 적용
