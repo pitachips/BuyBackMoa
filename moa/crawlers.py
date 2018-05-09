@@ -1,4 +1,4 @@
-import requests
+# import requests
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -67,32 +67,35 @@ def select_aladin(soup, page, link):
 
 
 def crawl_yes24(searchword, page):
-    url = yes24_base_url + '?SearchWord=' + quote(searchword, encoding='euc-kr')
+    url = yes24_base_url + '?SearchWord=' + quote(searchword, encoding='euc-kr')\
+          + '&CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y&pageIndex='
     # params에 넣으면 인코딩문제 발생.. 해결 필요
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
-        'Referer': 'http://www.yes24.co.kr/Mall/BuyBack/Search?CategoryNumber=018',
+        'Referer': url + '1'
     }
-    params = {
-        'CategoryNumber':'018',
-        'SearchDomain':'BOOK',  # 국내도서
-        'BuybackAccept':'Y',
-        'pageIndex':page,
-    }
-    response = requests.get(url, headers=headers, params=params)
-    html = response.text
+    # params = {
+    #     'CategoryNumber':'018',
+    #     'SearchDomain':'BOOK',  # 국내도서
+    #     'BuybackAccept':'Y',
+    #     'pageIndex':page,
+    # }
+    req = Request(url+str(page), headers=headers)
+    response = urlopen(req)
+    # response = requests.get(url, headers=headers, params=params)
+    # html = response.text
+    html = response.read().decode('euc-kr')
     soup = BeautifulSoup(html, 'html.parser')
     item = select_yes24(soup, page, response.url)
     return item
 
 
-
 def crawl_aladin(searchword, page):
     url = aladin_base_url + '?KeyWord=' + quote(searchword, encoding="euc-kr") + '&ActionType=1&SearchTarget=Book&page='
     headers = {
-        'User-Agent':'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
-        'Referer':url + str(page-1),
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+        'Referer': url + '1'
         # 'Connection':'close'
     }
     # params = {
