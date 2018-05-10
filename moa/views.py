@@ -4,7 +4,9 @@ from concurrent import futures
 from itertools import zip_longest
 from urllib.parse import quote
 from django.core.cache import cache
+from django.core.exceptions import RequestDataTooBig
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import Http404
 from django.shortcuts import render
 from .crawlers import crawl_yes24, crawl_aladin, yes24_base_url, aladin_base_url
 
@@ -16,6 +18,11 @@ def index(request):
 def result(request):
     # t1 = time.time()
     query = request.GET.get('searchword')
+    if not query:
+        raise Http404()
+    if len(query.encode()) > 97:
+        raise RequestDataTooBig('Memecached key length must be less than 100 bytes')
+
     total_resultset = []
     key = query.strip().replace(" ", ".")
     content_j = cache.get(key)
