@@ -1,66 +1,51 @@
-{%extends 'moa/index.html' %}
+{% extends 'moa/index.html' %}
 {% load staticfiles %}
 
-<!DOCTYPE html>
-<html>
 
-<head>
-    <meta http-equiv="content-type" content="text/html" charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="pita" />
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    {% block head %}
-    <link href="{% static 'css/search_result.css' %}" rel="stylesheet" />
-    <title>바이백 모아</title>
-    {% endblock %}
-</head>
-
-<body>
-    <div class="container">
-      <header class="header clearfix">
-        <h3 class="text-muted"><a href="{% url 'index' %}">바이백 모아</a></h3>
-      </header>
-
-      {% block main %}
-
-      <div class="jumbotron">
-        <h3 class="display-3">중고책 매입가 검색</h3>
-        <form class="form-search form-inline" method="GET" action="{% url 'result' %}" role="search">
-          <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" />
-          <input class="btn btn-dark" type="submit" />
-        </form>
-      </div>
-
-      {% for result in total_resultset_paged %}
-      <div class="row">
-        <div class="col-md-3 text-center">
-          <img class="img-fluid buyback-item" src="{{ result.image }}">
-        </div>
-        <div class="col-md-9">
-          <h3 class="buyback-item"> {{ result.title }}</h3>
-          <p>{{ result.author }} | {{ result.publisher }} | {{ result.pubdate }}</p>
-          <p>정가: {{ result.prices.0 }} | 바이백(최상): {{ result.prices.1 }} | 바이백(상): {{ result.prices.2 }} | 바이백(중): {{ result.prices.3 }}</p>
-          <a class="btn btn-success" href="{{ result.link }}" target="_blank">{{ result.platform }}에서 팔기</a>
-        </div>
-      </div>
-      <hr />
-      {% endfor %}
-
-      <div class="pagination justify-content-center">
-        <span class="step-links">
-        {% if total_resultset_paged.has_previous %}
-            <a class="page-link" href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.previous_page_number }}">prev</a>
-        {% endif %}
-        <span class="current">
-            Page {{ total_resultset_paged.number }} of {{ total_resultset_paged.paginator.num_pages }}
-        </span>
-        {% if total_resultset_paged.has_next %}
-            <a class="page-link" href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.next_page_number }}">next</a>
-        {% endif %}
-      </div>
+{% block head %}
+  <link href="{% static 'css/search_result.css' %}" rel="stylesheet" />
+  <title>바이백 모아</title>
+{% endblock %}
 
 
-    {% endblock %}
+{% block main %}
+  <div class="jumbotron">
+    <h3 class="display-3">중고책 매입가 검색</h3>
+    <form class="form-search form-inline" method="GET" action="{% url 'result' %}" role="search">
+      <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" />
+      <input class="btn btn-dark" type="submit" />
+    </form>
+  </div>
+
+  {% for result in total_resultset_paged %}
+  <div class="row">
+    <div class="col-md-3 text-center">
+      <img class="img-fluid buyback-item" src="{{ result.image }}">
+    </div>
+    <div class="col-md-9">
+      <h3 class="buyback-item"> {{ result.title }}</h3>
+      <p>{{ result.author }} | {{ result.publisher }} | {{ result.pubdate }}</p>
+      <p>정가: {{ result.prices.0 }} | 바이백(최상): {{ result.prices.1 }} | 바이백(상): {{ result.prices.2 }} | 바이백(중): {{ result.prices.3 }}</p>
+      <a class="btn btn-success bb-link" href="{{ result.link }}" target="_blank">{{ result.platform }}에서 팔기</a>
+    </div>
+  </div>
+  <hr />
+  {% endfor %}
+
+  <div class="pagination text-center justify-content-center">
+    <span class="step-links">
+    {% if total_resultset_paged.has_previous %}
+        <a class="page-link" href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.previous_page_number }}">&#9664;</a>
+    {% endif %}
+    <span class="current">
+        {{ total_resultset_paged.number }} of {{ total_resultset_paged.paginator.num_pages }}
+    </span>
+    {% if total_resultset_paged.has_next %}
+        <a class="page-link" href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.next_page_number }}"> &#9658;</a>
+    {% endif %}
+    </span>
+  </div>
+{% endblock %}
 
 
 
@@ -116,9 +101,7 @@ function load_page(
     });
 }
     </script>
- -->
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-</body>
-
-</html>
+ -->

@@ -35,23 +35,29 @@ body {
   border-bottom: .05rem solid #e5e5e5;
 }
 .display-3 {
-    margin-top: 0px;
+  margin-top: 0px;
 }
 
 /*Buyback item list*/
 .buyback-item {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 img.buyback-item{
-    width: 60%;
-    max-width: 120px;
+  width: 60%;
+  max-width: 120px;
+}
+
+/* Page navigator */
+.pagination {
+  display: block;
 }
 
 /* Custom page footer */
 .footer {
-  padding-top: 1.5rem;
+  padding-top: 2.5rem;
   color: #777;
-  border-top: .05rem solid #e5e5e5;
+  text-align: right;
+  /*border-top: .05rem solid #e5e5e5;*/
 }
 
 /* Customize container */
