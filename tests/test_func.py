@@ -1,9 +1,10 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
-class NewVisitorTest(LiveServerTestCase):
+
+class NewVisitorTest(StaticLiveServerTestCase):
 
     def send_searchword_to_searchbox(self, searchword, timeout=5, clearup=True):
         searchbox = self.browser.find_element_by_id('searchbox')
@@ -15,6 +16,9 @@ class NewVisitorTest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Chrome()
+        staging_server = os.environ.get('STAGING_SERVER')
+        if staging_server:
+            self.live_server_url = 'http://' + staging_server
         self.browser.implicitly_wait(3)
 
     def tearDown(self):
@@ -39,7 +43,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertLessEqual(len(books), 20)
         # 페이지 맨 하단으로 내려가서 next 페이지가 있는지 확인하고, 있으면 next를 눌러본다.
         next = self.browser.find_element_by_class_name('page-link')
-        self.assertEqual(next.text, 'next')
+        self.assertEqual(next.text, '►')
         cur_url = self.browser.current_url
         self.assertEqual(cur_url + '&page=2', next.get_attribute('href'))
         # next 페이지에 나타난 첫번째 아이템이 선우가 팔려고 했던 책이다.
@@ -72,3 +76,19 @@ class NewVisitorTest(LiveServerTestCase):
         # ISBN에 대한 책은 하나밖에 없으므로 리스트 최대길이는 2를 넘으면 안 된다.
         books = self.browser.find_elements_by_class_name('row')
         self.assertLessEqual(len(books), 2)
+
+
+    def test_identical_item_is_served_from_memcached_to_different_browsers(self):
+        # 크롬에서 '고성능 파이썬'을 검색한다.
+        self.browser.get(self.live_server_url)
+        self.send_searchword_to_searchbox('고성능 파이썬', 5)
+        # 크롬 종료
+        self.browser.quit()
+        # 사파리를 열고, '고성능 파이썬'을 검색한다.
+        self.browser = webdriver.Safari()
+        self.browser.get(self.live_server_url)
+        # 아주 빠른 시간 내에 리턴되어야 한다.
+        self.send_searchword_to_searchbox('고성능 파이썬', 1)
+
+
+
