@@ -18,6 +18,7 @@ def index(request):
 def result(request):
     # t1 = time.time()
     query = request.GET.get('searchword')
+    # validator 작성? [a-zA-Aㄱ-힣0-9-_!@#$%&*()=+.,/?'";:[]{}~₩]  // &# 비허용
     if not query:
         raise Http404()
     if len(query.encode()) > 97:

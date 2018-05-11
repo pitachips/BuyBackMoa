@@ -35,3 +35,7 @@ secret.json
 
 # idea
 .idea/
+
+
+# env variables
+.env

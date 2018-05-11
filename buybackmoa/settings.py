@@ -22,26 +22,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ['SECRET_KEY']
+PROJECT_ENV = os.environ.get('PROJECT_ENV', 'dev')
 
-with open('secret.json', 'r') as f:
-    secret = json.loads(f.read())
+# Database
+# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-def get_secret(key, secret=secret):
-    try:
-        return secret[key]
-    except:
-        msg = "Set key '{0}' in secret.json".format(key)
-        raise ImproperlyConfigured(msg)
-
-SECRET_KEY = get_secret('SECRET_KEY') # secret.json 세팅 필요
-
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['127.0.0.1', ]
-
+if PROJECT_ENV == 'prod':
+    DEBUG = False
+    ALLOWED_HOSTS = [os.environ['HOST']]
+    DATABASES = {}
+else:
+    DEBUG = True
+    ALLOWED_HOSTS = []
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 # Application definition
 
@@ -84,18 +83,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'buybackmoa.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
-# Disable Database in production
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
 
 CACHES = {
     'default': {
@@ -144,5 +131,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'moa', 'static'),
+    os.path.join(BASE_DIR, '../../moa', 'static'),
 )
