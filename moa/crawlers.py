@@ -45,9 +45,14 @@ def select_aladin(soup, page, link):
         # author, publisher, pubdate는 한번에 처리
         pubinfo = tag.select('td')[3].find_all(text=True)[:-1]
         pubinfo = pubinfo[3:] if pubinfo[2].startswith(' -') else pubinfo[2:]
-        *author, publisher_v, pubdate = pubinfo
-        author_v = ''.join(author).rstrip(' | ')
-        pubdate_v = pubdate.lstrip(" | ")
+        if pubinfo:
+            *author, publisher_v, pubdate = pubinfo
+            author_v = ''.join(author).rstrip(' | ')
+            pubdate_v = pubdate.lstrip(" | ")
+        else:
+            author_v = ''
+            publisher_v = ''
+            pubdate_v = ''
         # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
         prices_v = list(p.text for p in tag.select('.c2b_tablet3'))
         book = {
