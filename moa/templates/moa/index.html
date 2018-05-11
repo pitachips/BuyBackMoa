@@ -31,7 +31,7 @@
             <img class="logo" src="{% static 'image/yes24_logo.png' %}" /><img class="logo" src="{% static 'image/aladin_logo.png' %}" />
           </p>
           <form class="form-search form-inline" method="GET" action="{% url 'result' %}" role="search">
-            <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 목, 저자, ISBN 등" value="{{ request.GET.searchword }}" required autofocus />
+            <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" required autofocus />
             <button type="submit" class="btn btn-dark">검색</button>
           </form>
           {% if advice %}<p>{{ advice }}</p>{% endif %}
