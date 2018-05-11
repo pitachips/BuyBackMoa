@@ -35,8 +35,19 @@ body {
   border-bottom: .05rem solid #e5e5e5;
 }
 .display-3 {
-  margin-top: 0px;
+  margin-top: 0;
 }
+
+/* search form */
+.btn-dark {
+    color: white;
+    background-color: #444;
+}
+.btn-dark:hover {
+    color: white;
+    background-color: #111;
+}
+
 
 /*Buyback item list*/
 .buyback-item {

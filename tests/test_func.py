@@ -18,7 +18,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.browser = webdriver.Chrome()
         staging_server = os.environ.get('STAGING_SERVER')
         if staging_server:
-            self.live_server_url = 'http://' + staging_server
+            self.live_server_url = staging_server
         self.browser.implicitly_wait(3)
 
     def tearDown(self):

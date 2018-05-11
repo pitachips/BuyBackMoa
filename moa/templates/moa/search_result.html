@@ -13,7 +13,7 @@
     <h3 class="display-3">중고책 매입가 검색</h3>
     <form class="form-search form-inline" method="GET" action="{% url 'result' %}" role="search">
       <input id="searchbox" class="form-control" type="text" name="searchword" placeholder="책 제목, 저자, ISBN 등" value="{{ request.GET.searchword }}" />
-      <input class="btn btn-dark" type="submit" />
+      <button type="submit" class="btn btn-dark">검색</button>
     </form>
   </div>
 
