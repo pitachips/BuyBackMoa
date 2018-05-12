@@ -41,7 +41,7 @@ PROJECT_ENV = get_secret('PROJECT_ENV')
 
 if PROJECT_ENV == 'prod':
     DEBUG = False
-    ALLOWED_HOSTS = get_secret('HOST')
+    ALLOWED_HOSTS = [get_secret('HOST'), ]
     DATABASES = {}
 else:
     DEBUG = True

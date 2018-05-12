@@ -28,14 +28,13 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+# idea
+.idea/
+
+# deploy related files
+.env
+deploy.json
 
 # secret keys
 secret.json
 
-
-# idea
-.idea/
-
-
-# env variables
-.env
