@@ -87,14 +87,18 @@ def crawl_yes24(searchword, page):
     #     'pageIndex':page,
     # }
     req = Request(url+str(page), headers=headers)
-    response = urlopen(req)
+    try:
+        response = urlopen(req)
+    except HTTPError:
+        return []
     # response = requests.get(url, headers=headers, params=params)
     # html = response.text
-    html = response.read().decode('euc-kr')
+    html = response.read().decode('cp949')
     soup = BeautifulSoup(html, 'html.parser')
     item = select_yes24(soup, page, response.url)
     return item
 
+from urllib.error import HTTPError
 
 def crawl_aladin(searchword, page):
     url = aladin_base_url + '?KeyWord=' + quote(searchword, encoding="euc-kr") + '&ActionType=1&SearchTarget=Book&page='
@@ -110,9 +114,12 @@ def crawl_aladin(searchword, page):
     # }
     # response = requests.get(url+str(page), headers=headers)
     req = Request(url=url+str(page), headers=headers)
-    response = urlopen(req)
+    try:
+        response = urlopen(req)
+    except HTTPError:
+        return []
     # response = urlopen(url)  ## 헤더 다 필요없이 그냥 보내기
-    html = response.read().decode('euc-kr')
+    html = response.read().decode('cp949')
     soup = BeautifulSoup(html, 'html.parser')
     item = select_aladin(soup, page, response.url)
     return item
