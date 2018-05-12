@@ -22,15 +22,26 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
-PROJECT_ENV = os.environ.get('PROJECT_ENV', 'dev')
+# SECRET_KEY = os.environ['SECRET_KEY']
 
-# Database
-# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+with open('secret.json', 'r') as f:
+    secret = json.loads(f.read())
+
+
+def get_secret(key, secret=secret):
+    try:
+        return secret[key]
+    except:
+        msg = "Set key '{0}' in secret.json".format(key)
+        raise ImproperlyConfigured(msg)
+
+
+SECRET_KEY = get_secret('SECRET_KEY') # secret.json 세팅 필요
+PROJECT_ENV = get_secret('PROJECT_ENV')
 
 if PROJECT_ENV == 'prod':
     DEBUG = False
-    ALLOWED_HOSTS = [os.environ['HOST']]
+    ALLOWED_HOSTS = get_secret('HOST')
     DATABASES = {}
 else:
     DEBUG = True
@@ -41,6 +52,9 @@ else:
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
+# Database
+# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+
 
 # Application definition
 

@@ -1,13 +1,19 @@
 import random
 from fabric.api import cd, env, local, run
 from fabric.contrib.files import exists, append
+import os
+import json
 
 
-env.USER = 'ubuntu'
-env.key_filename = ['/Users/pita/Desktop/buybackmoa-ec2.pem']
-env.hosts = ['ubuntu@ec2-13-209-69-177.ap-northeast-2.compute.amazonaws.com']
-
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_URL = 'https://github.com/pitachips/BuyBackMoa.git'
+
+with open(os.path.join(PROJECT_DIR, "secret.json")) as f:
+    ENVS = json.loads(f.read())
+
+env.USER = ENVS['user']
+env.key_filename = ENVS['key_filename']
+env.hosts = ENVS['hosts']
 
 
 def _get_latest_source():
@@ -26,12 +32,10 @@ def _update_virtualenv():
 
 
 def _create_or_update_dotenv():
-    append('.env', 'PROJECT_ENV=prod')
-    append('.env', 'SITENAME=buybackmoa')
-    current_contents = run('cat .env')
-    if 'SECRET_KEY' not in current_contents:
+    # ENVS['PROJECT_ENV'] = "prod"
+    if 'SECRET_KEY' not in ENVS:
         new_secret = ''.join(random.SystemRandom().choices(r'!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=50))
-        append('.env', 'SECRET_KEY={}'.format(new_secret))
+        ENVS['SECRET_KEY'] = new_secret
 
 
 def _update_static_files():
@@ -46,6 +50,7 @@ def deploy():
     site_folder = '/home/{}/buybackmoa'.format(env.USER)
     run('mkdir -p {}'.format(site_folder))
     with cd(site_folder):
+        run('whoami')
         _get_latest_source()
         _update_virtualenv()
         _create_or_update_dotenv()
