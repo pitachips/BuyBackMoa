@@ -3,6 +3,10 @@ from fabric.api import cd, env, local, run
 from fabric.contrib.files import exists, append
 
 
+env.USER = 'ubuntu'
+env.key_filename = ['/Users/pita/Desktop/buybackmoa-ec2.pem']
+env.hosts = ['ubuntu@ec2-13-209-69-177.ap-northeast-2.compute.amazonaws.com']
+
 REPO_URL = 'https://github.com/pitachips/BuyBackMoa.git'
 
 
@@ -22,11 +26,11 @@ def _update_virtualenv():
 
 
 def _create_or_update_dotenv():
-    append('.env', 'DEBUG=False')
-    append('.env', 'SITENAME={}'.format(env.host))
+    append('.env', 'PROJECT_ENV=prod')
+    append('.env', 'SITENAME=buybackmoa')
     current_contents = run('cat .env')
     if 'SECRET_KEY' not in current_contents:
-        new_secret = ''.join(random.SystemRandom().choices(r'!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=50 ))
+        new_secret = ''.join(random.SystemRandom().choices(r'!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=50))
         append('.env', 'SECRET_KEY={}'.format(new_secret))
 
 
@@ -39,7 +43,7 @@ def _update_database():
 
 
 def deploy():
-    site_folder = '/home/{}/buybackmoa'.format(env.user)
+    site_folder = '/home/{}/buybackmoa'.format(env.USER)
     run('mkdir -p {}'.format(site_folder))
     with cd(site_folder):
         _get_latest_source()
