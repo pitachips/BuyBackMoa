@@ -34,6 +34,7 @@ docs/_build/
 # deploy related files
 .env
 deploy.json
+**.service
 
 # secret keys
 secret.json

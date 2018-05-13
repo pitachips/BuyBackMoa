@@ -2,6 +2,7 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from unittest import skip
 
 
 class NewVisitorTest(StaticLiveServerTestCase):
@@ -24,8 +25,8 @@ class NewVisitorTest(StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-    def test_new_visitor(self):
-        # 선우는 특허법을 판매하려고 사이트에 접속한다
+
+    def test_layout_and_static_files(self):
         self.browser.get(self.live_server_url)
         # 이 곳이 바이백 모아 임을 확인한다
         self.assertIn('바이백 모아', self.browser.title)
@@ -33,9 +34,13 @@ class NewVisitorTest(StaticLiveServerTestCase):
         logos = self.browser.find_elements_by_class_name('logo')
         self.assertTrue(any('/static/image/yes24_logo.png' in logo.get_attribute('src') for logo in logos))
         self.assertTrue(any('/static/image/aladin_logo.png' in logo.get_attribute('src') for logo in logos))
-        # 검색창을 발견한다.
+        # 검색창의 placeholder가 잘 있는지 확인한다
         searchbox = self.browser.find_element_by_id('searchbox')
         self.assertEqual(searchbox.get_attribute('placeholder'), '책 제목, 저자, ISBN 등')
+
+
+    def test_basic_search(self):
+        self.browser.get(self.live_server_url)
         # 검색창에 '특허법' 을 입력하고 전송한다. 결과는 5초의 시간 내에 렌더되어야 한다.
         self.send_searchword_to_searchbox('특허법', 5)
         # 그러면 알라딘 및 예스24에서 바이백 가능한 특허법 관련 책 리스트가 나온다. 그 리스트는 최대 20개 아이템을 가지고 있다.
@@ -90,5 +95,8 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # 아주 빠른 시간 내에 리턴되어야 한다.
         self.send_searchword_to_searchbox('고성능 파이썬', 1)
 
-
-
+    def test_empty_searchword_cannot_be_submitted(self):
+        self.browser.get(self.live_server_url)
+        before = self.live_server_url
+        self.send_searchword_to_searchbox('', 1)
+        self.assertEqual(before + '/', self.browser.current_url)

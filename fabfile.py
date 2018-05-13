@@ -38,8 +38,9 @@ def _update_database():
     run('./venv/bin/python manage.py migrate')
 
 
-def _tryit():
+def _restart_server():
     run('source venv/bin/activate')
+    run('sudo systemctl daemon-reload')
     run('sudo systemctl restart gunicorn')
     run('sudo systemctl status gunicorn')
     run('sudo nginx -t')
@@ -53,7 +54,7 @@ def deploy():
         _get_latest_source()
         _update_virtualenv()
         _update_static_files()
-        _tryit()
+        _restart_server()
 
 
 ## https://www.obeythetestinggoat.com/book/chapter_automate_deployment_with_fabric.html 참고

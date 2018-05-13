@@ -3,6 +3,7 @@
 from django.urls import resolve, reverse
 from django.test import TestCase
 from moa.views import index as view_index, result as view_result
+from unittest import skip
 
 
 class IndexPageTest(TestCase):
@@ -41,3 +42,16 @@ class ResultPageTest(TestCase):
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('result'), {'searchword': '가' * 32, })
         self.assertEqual(response.status_code, 200)
+
+    def test_empty_searchword_returns_http404(self):
+        response = self.client.get(reverse('result'), {'searchword': ''})
+        self.assertEqual(response.status_code, 404)
+
+    def test_edge_case_searchwords_return_http200(self):
+        response = self.client.get(reverse('result'), {'searchword': '??????'})
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('result'), {'searchword': '&#9232;'})
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('result'), {'searchword': '!#@^#%?>"25뛟"'})
+        self.assertEqual(response.status_code, 200)
+
