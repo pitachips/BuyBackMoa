@@ -1,0 +1,38 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/BuyBackMoa
+    docker:
+      - image: circleci/python:3.5-browsers
+    steps:
+      - checkout
+
+      # Download and cache dependencies, and then install requirements.txt
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "requirements.txt" }}
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip3 install --upgrade pip setuptools
+            pip install -r requirements.txt
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      # run tests. this uses Django's built-in test-runner
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            python manage.py test
+      - store_test_results:
+          path: test-results
+      # store artifacts
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+          

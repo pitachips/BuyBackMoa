@@ -50,15 +50,20 @@ def _update_database():
 
 def _configure_gunicorn():
     run('source venv/bin/activate')
-    run('./venv/bin/gunicorn --bind 0.0.0.0:8000 buybackmoa.wsgi:application')
+    # run('./venv/bin/gunicorn --bind 0.0.0.0:8000 buybackmoa.wsgi:application')
+    if exists('/etc/systemd/system/gunicorn.service'):
+        run('sudo rm -f /etc/systemd/system/gunicorn.service')
     run('sudo ln -s ~/buybackmoa/buybackmoa/gunicorn.service /etc/systemd/system/')
     run('sudo systemctl daemon-reload')
     run('sudo systemctl start gunicorn')
 
 
 def _configure_nginx():
-    run('sudo rm /etc/nginx/sites-enabled/default')
-    run('sudo ln -s ~/buybackmoa/buybackmoa/nginxconf_buybackmoa /etc/nginx/sites-enabled')
+    if exists('/etc/nginx/sites-enabled/default'):
+        run('sudo rm /etc/nginx/sites-enabled/default')
+    if exists('/etc/nginx/sites-enabled/buybackmoa'):
+        run('sudo rm -f /etc/nginx/sites-enabled/buybackmoa')
+    run('sudo ln -s ~/buybackmoa/buybackmoa/nginxconf_buybackmoa /etc/nginx/sites-enabled/buybackmoa')
 
 
 def _restart_server():
