@@ -41,7 +41,7 @@
         {{ total_resultset_paged.number }} of {{ total_resultset_paged.paginator.num_pages }}
     </span>
     {% if total_resultset_paged.has_next %}
-        <a class="page-link" href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.next_page_number }}"> &#9658;</a>
+        <a class="page-link" href="?searchword={{ request.GET.searchword }}&page={{ total_resultset_paged.next_page_number }}"> &#9654;</a>
     {% endif %}
     </span>
   </div>

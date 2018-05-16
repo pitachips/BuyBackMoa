@@ -42,9 +42,9 @@ def _restart_server():
     run('source venv/bin/activate')
     run('sudo systemctl daemon-reload')
     run('sudo systemctl restart gunicorn')
-    run('sudo systemctl status gunicorn')
     run('sudo nginx -t')
     run('sudo service nginx restart')
+    run('sudo systemctl status gunicorn')
 
 
 def deploy():

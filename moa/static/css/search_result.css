@@ -39,6 +39,10 @@ body {
 }
 
 /* search form */
+#searchbox {
+  display: inline-block;
+  width: auto;
+}
 .btn-dark {
     color: white;
     background-color: #444;
@@ -67,7 +71,7 @@ img.buyback-item{
 .footer {
   padding-top: 2.5rem;
   color: #777;
-  text-align: right;
+  /*text-align: right;*/
   /*border-top: .05rem solid #e5e5e5;*/
 }
 
