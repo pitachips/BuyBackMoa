@@ -15,6 +15,16 @@ env.key_filename = ENVS['key_filename']
 env.hosts = ENVS['hosts']
 
 
+def _initial_setup():
+    run('sudo apt-get -y upgrade')
+    run('sudo apt-get -y update')
+    run('sudo apt-get -y install python3-pip python3-dev python3-venv nginx memcached git')
+    run('sudo apt-get update')
+    run('pip3 --version')
+    run('pip3 install --upgrade pip setuptools')
+    run('pip --version')
+
+
 def _get_latest_source():
     if exists('.git'):
         run('git fetch')   # git pull이 아니라 git fetch 임
@@ -38,26 +48,37 @@ def _update_database():
     run('./venv/bin/python manage.py migrate')
 
 
+def _configure_gunicorn():
+    run('source venv/bin/activate')
+    run('./venv/bin/gunicorn --bind 0.0.0.0:8000 buybackmoa.wsgi:application')
+    run('sudo ln -s ~/buybackmoa/buybackmoa/gunicorn.service /etc/systemd/system/')
+    run('sudo systemctl daemon-reload')
+    run('sudo systemctl start gunicorn')
+
+
+def _configure_nginx():
+    run('sudo rm /etc/nginx/sites-enabled/default')
+    run('sudo ln -s ~/buybackmoa/buybackmoa/nginxconf_buybackmoa /etc/nginx/sites-enabled')
+
+
 def _restart_server():
     run('source venv/bin/activate')
-    run('sudo systemctl daemon-reload')
     run('sudo systemctl restart gunicorn')
     run('sudo nginx -t')
     run('sudo service nginx restart')
-    run('sudo systemctl status gunicorn')
+    # run('sudo systemctl status gunicorn')
 
 
 def deploy():
     site_folder = '/home/{}/buybackmoa'.format(env.USER)
     run('mkdir -p {}'.format(site_folder))
     with cd(site_folder):
+        _initial_setup()
         _get_latest_source()
         _update_virtualenv()
         _update_static_files()
-        # idempotency 획득을 위해, 
-        # guniorn.service 파일 생성 및 symlink 생성
-        # sites-available에 nginx.conf 파일 생성 및 sites-enabled에 symlink 생성
-        # gunicorn --bind 명령
+        _configure_gunicorn()
+        _configure_nginx()
         _restart_server()
 
 
