@@ -2,6 +2,7 @@
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError
 
 
 yes24_base_url = 'http://www.yes24.co.kr/Mall/buyback/Search'
@@ -72,7 +73,7 @@ def select_aladin(soup, page, link):
 
 
 def crawl_yes24(searchword, page):
-    url = yes24_base_url + '?SearchWord=' + quote(searchword, encoding='euc-kr')\
+    url = yes24_base_url + '?SearchWord=' + quote(searchword, encoding='cp949')\
           + '&CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y&pageIndex='
     # params에 넣으면 인코딩문제 발생.. 해결 필요
 
@@ -98,10 +99,9 @@ def crawl_yes24(searchword, page):
     item = select_yes24(soup, page, response.url)
     return item
 
-from urllib.error import HTTPError
 
 def crawl_aladin(searchword, page):
-    url = aladin_base_url + '?KeyWord=' + quote(searchword, encoding="euc-kr") + '&ActionType=1&SearchTarget=Book&page='
+    url = aladin_base_url + '?KeyWord=' + quote(searchword, encoding="cp949") + '&ActionType=1&SearchTarget=Book&page='
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
         'Referer': url + '1'

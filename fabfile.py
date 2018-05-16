@@ -54,6 +54,10 @@ def deploy():
         _get_latest_source()
         _update_virtualenv()
         _update_static_files()
+        # idempotency 획득을 위해, 
+        # guniorn.service 파일 생성 및 symlink 생성
+        # sites-available에 nginx.conf 파일 생성 및 sites-enabled에 symlink 생성
+        # gunicorn --bind 명령
         _restart_server()
 
 

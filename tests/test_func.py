@@ -98,5 +98,5 @@ class NewVisitorTest(StaticLiveServerTestCase):
     def test_empty_searchword_cannot_be_submitted(self):
         self.browser.get(self.live_server_url)
         before = self.live_server_url
-        self.send_searchword_to_searchbox('', 1)
+        self.send_searchword_to_searchbox('', 5)
         self.assertEqual(before + '/', self.browser.current_url)
