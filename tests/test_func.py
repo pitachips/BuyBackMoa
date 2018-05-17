@@ -31,7 +31,6 @@ class NewVisitorTest(StaticLiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
-
     def test_layout_and_static_files(self):
         self.browser.get(self.live_server_url)
         # 이 곳이 바이백 모아 임을 확인한다
@@ -43,7 +42,6 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # 검색창의 placeholder가 잘 있는지 확인한다
         searchbox = self.browser.find_element_by_id('searchbox')
         self.assertEqual(searchbox.get_attribute('placeholder'), '책 제목, 저자, ISBN 등')
-
 
     def test_basic_search(self):
         self.browser.get(self.live_server_url)
@@ -87,7 +85,6 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # ISBN에 대한 책은 하나밖에 없으므로 리스트 최대길이는 2를 넘으면 안 된다.
         books = self.browser.find_elements_by_class_name('row')
         self.assertLessEqual(len(books), 2)
-
 
     def test_identical_item_is_served_from_memcached_to_different_browsers(self):
         # 크롬에서 '고성능 파이썬'을 검색한다.
