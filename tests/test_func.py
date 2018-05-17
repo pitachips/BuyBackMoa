@@ -48,7 +48,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.assertLessEqual(len(books), 20)
         # 페이지 맨 하단으로 내려가서 next 페이지가 있는지 확인하고, 있으면 next를 눌러본다.
         next = self.browser.find_element_by_class_name('page-link')
-        self.assertEqual(next.text, '►')
+        self.assertEqual(next.text, '▶')
         cur_url = self.browser.current_url
         self.assertEqual(cur_url + '&page=2', next.get_attribute('href'))
         # next 페이지에 나타난 첫번째 아이템이 선우가 팔려고 했던 책이다.
@@ -90,7 +90,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # 크롬 종료
         self.browser.quit()
         # 사파리를 열고, '고성능 파이썬'을 검색한다.
-        self.browser = webdriver.Safari()
+        self.browser = webdriver.Firefox()
         self.browser.get(self.live_server_url)
         # 아주 빠른 시간 내에 리턴되어야 한다.
         self.send_searchword_to_searchbox('고성능 파이썬', 1)
