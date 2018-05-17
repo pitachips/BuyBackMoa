@@ -90,7 +90,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # 크롬 종료
         self.browser.quit()
         # 사파리를 열고, '고성능 파이썬'을 검색한다.
-        self.browser = webdriver.Firefox()
+        self.browser = webdriver.Chrome()
         self.browser.get(self.live_server_url)
         # 아주 빠른 시간 내에 리턴되어야 한다.
         self.send_searchword_to_searchbox('고성능 파이썬', 1)
