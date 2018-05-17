@@ -23,6 +23,10 @@ script:
   - whereis chromedriver
   - python manage.py collectstatic --noinput
   - python manage.py test
+  - zip -r latest *
+  - mkdir -p dpl_cd_upload
+  - mv latest.zip dpl_cd_upload/latest.zip
+
 
 deploy:  # deploy with s3, codedeploy
 - provider: s3
@@ -44,8 +48,3 @@ deploy:  # deploy with s3, codedeploy
   deployment_group: BBMgroup
   region: ap-northeast-2
   on: *2
-
-script:
-  - zip -r latest *
-  - mkdir -p dpl_cd_upload
-  - mv latest.zip dpl_cd_upload/latest.zip
