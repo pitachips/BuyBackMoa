@@ -10,28 +10,40 @@ services:
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y unzip
-
+  - sudo apt-get install -y unzipK
 install:
   - pip install -r requirements.txt
   - pip install -r requirements-dev.txt
-
-before_script: # Install ChromeDriver (64bits; replace 64 with 32 for 32bits).
+before_script:  # Install ChromeDriver (64bits; replace 64 with 32 for 32bits).
   - wget -N https://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
   - sudo unzip chromedriver_linux64.zip -d /usr/bin/
-#  - sudo mv -f ~/chromedriver /usr/local/share/
-#  - sudo chmod +x /usr/local/share/chromedriver
-#  - export PATH=$PATH:/usr/local/share/chrome-driver
-
 script:
-  - whereis google-chrome-stable
   - whereis chromedriver
+  - python manage.py collectstatic --noinput
   - python manage.py test
 
-deploy:
-  - provider: codedeploy
-    access_key_id: $AWS_ACCESS_KEY
-    secret_access_key: $AWS_SECRET_KEY
-    application: CDAforBBM
-    deployment_group: BBMgroup
-    region: ap-northeast-2
+deploy:  # deploy with s3, codedeploy
+- provider: s3
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  local_dir: dpl_cd_upload
+  skip_cleanup: true
+  on: &2
+    repo: pitachips/BuyBackMoa.git
+  bucket: storageforbbm
+  region: ap-northeast-2
+- provider: codedeploy
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  bucket: storageforbbm
+  key: latest.zip
+  bundle_type: zip
+  application: CDAforBBM
+  deployment_group: BBMgroup
+  region: ap-northeast-2
+  on: *2
+
+script:
+  - zip -r latest *
+  - mkdir -p dpl_cd_upload
+  - mv latest.zip dpl_cd_upload/latest.zip

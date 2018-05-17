@@ -5,6 +5,12 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from unittest import skip
 
 
+options = webdriver.ChromeOptions()
+options.add_argument('--headless')
+options.add_argument('--window-size=1920x1080')
+# options.add_argument("--disable-gpu")
+
+
 class NewVisitorTest(StaticLiveServerTestCase):
 
     def send_searchword_to_searchbox(self, searchword, timeout=5, clearup=True):
@@ -16,7 +22,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.browser.set_page_load_timeout(timeout)
 
     def setUp(self):
-        self.browser = webdriver.Chrome()
+        self.browser = webdriver.Chrome(chrome_options=options)
         staging_server = os.environ.get('STAGING_SERVER')
         if staging_server:
             self.live_server_url = staging_server
@@ -90,7 +96,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # 크롬 종료
         self.browser.quit()
         # 사파리를 열고, '고성능 파이썬'을 검색한다.
-        self.browser = webdriver.Chrome()
+        self.browser = webdriver.Chrome(chrome_options=options)
         self.browser.get(self.live_server_url)
         # 아주 빠른 시간 내에 리턴되어야 한다.
         self.send_searchword_to_searchbox('고성능 파이썬', 1)
