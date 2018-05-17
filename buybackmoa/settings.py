@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 import json
 from django.core.exceptions import ImproperlyConfigured
+from pathlib import Path
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -24,34 +25,27 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = os.environ['SECRET_KEY']
 
-with open('secret.json', 'r') as f:
-    secret = json.loads(f.read())
-
-
-def get_secret(key, secret=secret):
-    try:
-        return secret[key]
-    except:
-        msg = "Set key '{0}' in secret.json".format(key)
-        raise ImproperlyConfigured(msg)
-
-
-SECRET_KEY = get_secret('SECRET_KEY') # secret.json 세팅 필요
-PROJECT_ENV = get_secret('PROJECT_ENV')
-
-if PROJECT_ENV == 'prod':
-    DEBUG = False
-    ALLOWED_HOSTS = [get_secret('HOST'), ]
-    DATABASES = {}
-else:
-    DEBUG = True
-    ALLOWED_HOSTS = []
+PROJECT_ENV = os.environ.get('PROJECT_ENV')
+DEBUG = os.environ.get('DEBUG')
+SECRET_KEY = os.environ.get('SECRET_KEY')  # this is secret
+ALLOWED_HOSTS = []
+DATABASES = {}
+if PROJECT_ENV != 'prod':
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            }
         }
-    }
+
+# if PROJECT_ENV == 'prod':
+#     with open('secret.json', 'r') as f:
+#         secret = json.loads(f.read())
+#     DEBUG = False
+#     ALLOWED_HOSTS = [secret.get('HOST'), ] if 'HOST' in secret else ALLOWED_HOSTS   # secret.json 세팅 필요
+#     SECRET_KEY = secret.get('SECRET_KEY') if 'SECRET_KEY' in secret else SECRET_KEY  # use secret key in the secret.json
+#     DATABASES = {}
+
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
