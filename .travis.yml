@@ -12,8 +12,9 @@ addons:
 
 install: # Install ChromeDriver (64bits; replace 64 with 32 for 32bits).
   - wget -N https://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
-  - unzip ~/usr/bin/chromedriver_linux64.zip
-  - rm ~/usr/bin/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip .
+  - rm chromedriver_linux64.zip
+  - export PATH=$PATH:$PWD/chromedriver
 #  - sudo mv -f ~/chromedriver /usr/local/share/
 #  - sudo chmod +x /usr/local/share/chromedriver
 #  - export PATH=$PATH:/usr/local/share/chrome-driver
