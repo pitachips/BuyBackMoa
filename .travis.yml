@@ -2,7 +2,7 @@ language: python
 python:
   - '3.5'
 cache: pip
-dist: xenial
+#dist: xenial
 addons:
   chrome: stable
 services:
