@@ -51,9 +51,9 @@ def _update_database():
 def _configure_gunicorn():
     run('source venv/bin/activate')
     # run('./venv/bin/gunicorn --bind 0.0.0.0:8000 buybackmoa.wsgi:application')
-    if exists('/etc/systemd/system/gunicorn.service'):
-        run('sudo rm -f /etc/systemd/system/gunicorn.service')
-    run('sudo ln -s ~/buybackmoa/buybackmoa/gunicorn.service /etc/systemd/system/')
+    # if exists('/etc/systemd/system/gunicorn.service'):
+    #     run('sudo rm -f /etc/systemd/system/gunicorn.service')
+    # run('sudo ln -s ~/buybackmoa/buybackmoa/gunicorn.service /etc/systemd/system/')
     run('sudo systemctl daemon-reload')
     run('sudo systemctl start gunicorn')
 

@@ -42,8 +42,8 @@ if PROJECT_ENV == 'prod':
     with open('secret.json', 'r') as f:
         secret = json.loads(f.read())
     DEBUG = False
-    ALLOWED_HOSTS = [secret.get('HOST'), ] if 'HOST' in secret else ALLOWED_HOSTS   # secret.json 세팅 필요
-    SECRET_KEY = secret.get('SECRET_KEY') if 'SECRET_KEY' in secret else SECRET_KEY  # use secret key in the secret.json
+    ALLOWED_HOSTS.append(secret['HOST']) if 'HOST' in secret else ALLOWED_HOSTS   # secret.json 세팅 필요
+    SECRET_KEY = secret['SECRET_KEY'] if 'SECRET_KEY' in secret else SECRET_KEY  # use secret key in the secret.json
     DATABASES = {}
 
 # Database
