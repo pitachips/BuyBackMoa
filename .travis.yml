@@ -1,15 +1,17 @@
 language: python
 python:
   - '3.5'
+cache: pip
 
-script:
- - sudo apt-get update
+ before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y unzip
 
 addons:
   chrome: stable
 
 install: # Install ChromeDriver (64bits; replace 64 with 32 for 32bits).
-  - wget -N https://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip -P ~/usr/bin
+  - wget -N https://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
   - unzip ~/usr/bin/chromedriver_linux64.zip
   - rm ~/usr/bin/chromedriver_linux64.zip
 #  - sudo mv -f ~/chromedriver /usr/local/share/
