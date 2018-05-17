@@ -8,7 +8,7 @@ from unittest import skip
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
 options.add_argument('--window-size=1920x1080')
-# options.add_argument('--disable-gpu')
+options.add_argument('--disable-gpu')
 
 
 class NewVisitorTest(StaticLiveServerTestCase):
@@ -26,7 +26,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         staging_server = os.environ.get('STAGING_SERVER')
         if staging_server:
             self.live_server_url = staging_server
-        self.browser.implicitly_wait(3)
+        self.browser.implicitly_wait(10)
 
     def tearDown(self):
         self.browser.quit()
