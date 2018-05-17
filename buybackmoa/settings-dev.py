@@ -11,9 +11,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-import json
-from django.core.exceptions import ImproperlyConfigured
-from pathlib import Path
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -24,13 +21,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-# use secret.json in production
-with open('secret.json', 'r') as f:
-    secret = json.loads(f.read())
-DEBUG = False
-ALLOWED_HOSTS = ['52.78.139.88', ]
-SECRET_KEY = secret['SECRET_KEY']
-DATABASES = {}
+DEBUG = True
+SECRET_KEY = os.environ.get('SECRET_KEY')  # this is secret
+ALLOWED_HOSTS = []
+DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+
+
+# Database
+# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 
 # Application definition
@@ -83,6 +86,23 @@ CACHES = {
 }
 # brew install memcached 또는 sudo apt-get install memcached 를 필요로 함
 
+# Password validation
+# https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
+#
+# AUTH_PASSWORD_VALIDATORS = [
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+#     },
+# ]
 
 
 # Internationalization
@@ -97,6 +117,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')

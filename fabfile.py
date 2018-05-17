@@ -54,8 +54,8 @@ def _configure_gunicorn():
     # if exists('/etc/systemd/system/gunicorn.service'):
     #     run('sudo rm -f /etc/systemd/system/gunicorn.service')
     # run('sudo ln -s ~/buybackmoa/buybackmoa/gunicorn.service /etc/systemd/system/')
-    run('sudo systemctl daemon-reload')
-    run('sudo systemctl start gunicorn')
+    # run('sudo systemctl daemon-reload')
+    # run('sudo systemctl start gunicorn')
 
 
 def _configure_nginx():
@@ -63,14 +63,17 @@ def _configure_nginx():
         run('sudo rm /etc/nginx/sites-enabled/default')
     if exists('/etc/nginx/sites-enabled/buybackmoa'):
         run('sudo rm -f /etc/nginx/sites-enabled/buybackmoa')
-    run('sudo ln -s ~/buybackmoa/buybackmoa/nginxconf_buybackmoa /etc/nginx/sites-enabled/buybackmoa')
+    run('sudo ln -s /etc/nginx/sites-available/buybackmoa /etc/nginx/sites-enabled/buybackmoa')
 
 
 def _restart_server():
     run('source venv/bin/activate')
+    run('sudo systemctl daemon-reload')
     run('sudo systemctl restart gunicorn')
+    run('sudo systemctl enable gunicorn')
     run('sudo nginx -t')
     run('sudo service nginx restart')
+    run('sudo systemctl status gunicorn')
     # run('sudo systemctl status gunicorn')
 
 
