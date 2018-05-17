@@ -1,6 +1,8 @@
 language: python
 python:
   - '3.5'
+virtualenv:
+  system_site_packages: true
 cache: pip
 dist: xenial
 addons:
@@ -9,6 +11,7 @@ services:
   - memcached
 
 before_install:
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
   - sudo apt-get -qq update
   - sudo apt-get -y install nginx
   - pip install --upgrade pip setuptools
