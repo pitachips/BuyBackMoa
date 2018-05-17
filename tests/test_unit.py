@@ -54,4 +54,3 @@ class ResultPageTest(TestCase):
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('result'), {'searchword': '!#@^#%\'?>"25뛟"'})
         self.assertEqual(response.status_code, 200)
-

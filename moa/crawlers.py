@@ -123,4 +123,3 @@ def crawl_aladin(searchword, page):
     soup = BeautifulSoup(html, 'html.parser')
     item = select_aladin(soup, page, response.url)
     return item
-
