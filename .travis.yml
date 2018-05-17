@@ -18,7 +18,7 @@ install:
 
 before_script: # Install ChromeDriver (64bits; replace 64 with 32 for 32bits).
   - wget -N https://chromedriver.storage.googleapis.com/2.38/chromedriver_linux64.zip
-  - unzip chromedriver_linux64.zip -d /usr/bin/
+  - sudo unzip chromedriver_linux64.zip -d /usr/bin/
 #  - sudo mv -f ~/chromedriver /usr/local/share/
 #  - sudo chmod +x /usr/local/share/chromedriver
 #  - export PATH=$PATH:/usr/local/share/chrome-driver
