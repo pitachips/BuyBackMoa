@@ -30,6 +30,8 @@ jobs:
           command: |
             . venv/bin/activate
             python manage.py test
+            mkdir -p . test-results
+            mkdir -p . test-reports
       - store_test_results:
           path: test-results
       # store artifacts
