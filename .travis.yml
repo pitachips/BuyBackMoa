@@ -10,7 +10,7 @@ services:
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get -y install nginx
+  - sudo apt-get -y install unzip nginx memcached
   - pip install --upgrade pip setuptools
 install:
   - pip install -r requirements.txt
@@ -20,6 +20,7 @@ before_script:  # Install ChromeDriver (64bits; replace 64 with 32 for 32bits).
   - sudo unzip chromedriver_linux64.zip -d /usr/bin/
 
 script:
+  - whereis chromedriver
   - python manage.py collectstatic --noinput
   - python manage.py test
   - zip -r latest *
@@ -34,7 +35,6 @@ deploy:  # deploy with s3, codedeploy
   local_dir: dpl_cd_upload
   skip_cleanup: true
   on: &2
-    branch: master
     repo: pitachips/BuyBackMoa
   bucket: storageforbbm
   region: ap-northeast-2
