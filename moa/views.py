@@ -1,9 +1,9 @@
 import json
-# import time
+import ring
+from typing import Any, List
 from concurrent import futures
 from itertools import zip_longest
 from urllib.parse import quote
-from django.core.cache import cache
 from django.core.exceptions import RequestDataTooBig
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404
@@ -15,6 +15,21 @@ def index(request):
     return render(request, 'moa/index.html')
 
 
+@ring.django.cache(expire=30*60)  # 단위는 초
+def search_books(query: str) -> List[Any]:
+    total_resultset = []
+    with futures.ThreadPoolExecutor(max_workers=6) as exe:
+        fs = tuple(filter(None, sum(zip_longest([exe.submit(crawl_aladin, query, page) for page in range(1, 6)],
+                                                [exe.submit(crawl_yes24, query, page) for page in range(1, 4)]), ())))
+        done, undone = futures.wait(fs, timeout=3)
+        if undone:
+            for f in undone:
+                f.cancel()
+        for f in done:
+            total_resultset += f.result()
+    return total_resultset
+
+
 def result(request):
     # t1 = time.time()
     query = request.GET.get('searchword')
@@ -24,25 +39,9 @@ def result(request):
     if len(query.encode()) > 97:
         raise RequestDataTooBig('Memecached key length must be less than 100 bytes')
 
-    total_resultset = []
-    key = query.strip().replace(" ", ".")
-    content_j = cache.get(key)
+    total_resultset = search_books(query)
 
-    if content_j is None:
-        with futures.ThreadPoolExecutor(max_workers=6) as exe:
-            fs = tuple(filter(None, sum(zip_longest([exe.submit(crawl_aladin, query, page) for page in range(1, 6)],
-                                                    [exe.submit(crawl_yes24, query, page) for page in range(1, 4)]), ())))
-            # for f in futures.as_completed(fs, timeout=4):
-            #     total_resultset += f.result()
-            done, undone = futures.wait(fs, timeout=3)
-            if undone:
-                for f in undone:
-                    f.cancel()
-            for f in done:
-                total_resultset += f.result()
-
-        content_j = json.dumps(total_resultset)
-        cache.set(key, content_j, 60*5)
+    content_j = json.dumps(total_resultset)
     content = json.loads(content_j)
 
     page = request.GET.get('page')
