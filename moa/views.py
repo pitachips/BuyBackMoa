@@ -15,7 +15,7 @@ def index(request):
     return render(request, 'moa/index.html')
 
 
-@ring.django.cache(expire=30*60)  # 단위는 초
+@ring.django.cache(expire=30*60, coder="json")  # 단위는 초
 def search_books(query: str) -> List[Any]:
     total_resultset = []
     with futures.ThreadPoolExecutor(max_workers=6) as exe:
@@ -39,13 +39,11 @@ def result(request):
     if len(query.encode()) > 97:
         raise RequestDataTooBig('Memecached key length must be less than 100 bytes')
 
-    total_resultset = search_books(query)
-
-    content_j = json.dumps(total_resultset)
-    content = json.loads(content_j)
+    key = query.strip().replace(" ", ".")
+    total_resultset = search_books(key)
 
     page = request.GET.get('page')
-    paginator = Paginator(content, 20)
+    paginator = Paginator(total_resultset, 20)
     try:
         total_resultset_paged = paginator.page(page)
     except PageNotAnInteger:
