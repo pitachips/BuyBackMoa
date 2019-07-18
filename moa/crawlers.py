@@ -17,8 +17,7 @@ def select_yes24(soup, page, link):
         author_v = tag.select('span.bbG_auth')[0].text
         publisher_v = tag.select('span.bbG_pub')[0].text
         pubdate_v = tag.select('span.bbG_date')[0].text
-        prices = tag.select('div.bbG_price td')
-        # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
+        prices = tag.select('div.bbG_price td')   # prices_v 인덱스: 0 정가, 1 바이백 최상 , 2 바이백 상, 3 바애빅 중
         prices_v = list(map(lambda p: p.text, prices))
         book = {
             'image': image_v,
@@ -34,6 +33,34 @@ def select_yes24(soup, page, link):
         books.append(book)
     # print(books)
     return books
+
+
+def crawl_yes24(searchword, page):
+    url = yes24_base_url + '?SearchWord=' + quote(searchword, encoding='cp949')\
+          + '&CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y&pageIndex='
+    # params에 넣으면 인코딩문제 발생.. 해결 필요
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+        'Referer': url + '1'
+    }
+    # params = {
+    #     'CategoryNumber':'018',
+    #     'SearchDomain':'BOOK',  # 국내도서
+    #     'BuybackAccept':'Y',
+    #     'pageIndex':page,
+    # }
+    req = Request(url+str(page), headers=headers)
+    try:
+        response = urlopen(req)
+    except HTTPError:
+        return []
+    # response = requests.get(url, headers=headers, params=params)
+    # html = response.text
+    html = response.read().decode('cp949')
+    soup = BeautifulSoup(html, 'html.parser')
+    item = select_yes24(soup, page, response.url)
+    return item
 
 
 def select_aladin(soup, page, link):
@@ -71,33 +98,6 @@ def select_aladin(soup, page, link):
     # print(books)
     return books
 
-
-def crawl_yes24(searchword, page):
-    url = yes24_base_url + '?SearchWord=' + quote(searchword, encoding='cp949')\
-          + '&CategoryNumber=018&SearchDomain=BOOK&BuybackAccept=Y&pageIndex='
-    # params에 넣으면 인코딩문제 발생.. 해결 필요
-
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
-        'Referer': url + '1'
-    }
-    # params = {
-    #     'CategoryNumber':'018',
-    #     'SearchDomain':'BOOK',  # 국내도서
-    #     'BuybackAccept':'Y',
-    #     'pageIndex':page,
-    # }
-    req = Request(url+str(page), headers=headers)
-    try:
-        response = urlopen(req)
-    except HTTPError:
-        return []
-    # response = requests.get(url, headers=headers, params=params)
-    # html = response.text
-    html = response.read().decode('cp949')
-    soup = BeautifulSoup(html, 'html.parser')
-    item = select_yes24(soup, page, response.url)
-    return item
 
 
 def crawl_aladin(searchword, page):

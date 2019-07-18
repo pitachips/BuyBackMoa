@@ -38,3 +38,6 @@ deploy.json
 
 # secret keys
 secret.json
+
+#VS code
+.vscode/

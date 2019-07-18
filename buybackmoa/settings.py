@@ -27,9 +27,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # use secret.json in production
 with open('secret.json', 'r') as f:
     secret = json.loads(f.read())
-DEBUG = False
 ALLOWED_HOSTS = ['52.78.139.88', ]
-SECRET_KEY = secret['SECRET_KEY']
+DEBUG = True
+SECRET_KEY = "temp_secret_key" # secret['SECRET_KEY']
 DATABASES = {}
 
 

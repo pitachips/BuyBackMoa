@@ -9,7 +9,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.shortcuts import render
 from .crawlers import crawl_yes24, crawl_aladin, yes24_base_url, aladin_base_url
-
+from buybackmoa.settings_dev import DEBUG
 
 def index(request):
     return render(request, 'moa/index.html')
@@ -31,7 +31,8 @@ def search_books(query: str) -> List[Any]:
 
 
 def result(request):
-    # t1 = time.time()
+    if DEBUG:
+        t1 = time.time()
     query = request.GET.get('searchword')
     # validator 작성? [a-zA-Aㄱ-힣0-9-_!@#$%&*()=+.,/?'";:[]{}~₩]  // &# 비허용
     if not query:
@@ -56,6 +57,7 @@ def result(request):
         'yes24_url': yes24_base_url + quote(query, encoding="euc-kr"),
         'aladin_url': aladin_base_url + quote(query, encoding="euc-kr"),
     }
-    # print(time.time()-t1, '초, 총 소요시간')
+    if DEBUG:
+        print(time.time()-t1, '초, 총 소요시간')
 
     return render(request, 'moa/search_result.html', context)
