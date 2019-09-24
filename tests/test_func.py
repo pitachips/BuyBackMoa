@@ -52,7 +52,8 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.assertLessEqual(len(books), 20)
         # 페이지 맨 하단으로 내려가서 next 페이지가 있는지 확인하고, 있으면 next를 눌러본다.
         next = self.browser.find_element_by_class_name('page-link')
-        self.assertEqual(next.text, '▶')
+        if next:
+            self.assertEqual(next.text, '▶')
         cur_url = self.browser.current_url
         self.assertEqual(cur_url + '&page=2', next.get_attribute('href'))
         # next 페이지에 나타난 첫번째 아이템이 선우가 팔려고 했던 책이다.
