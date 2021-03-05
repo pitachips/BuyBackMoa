@@ -1,9 +1,10 @@
 import os
+
+from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from unittest import skip
-
 
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
@@ -51,11 +52,13 @@ class NewVisitorTest(StaticLiveServerTestCase):
         books = self.browser.find_elements_by_class_name('row')
         self.assertLessEqual(len(books), 20)
         # 페이지 맨 하단으로 내려가서 next 페이지가 있는지 확인하고, 있으면 next를 눌러본다.
-        next = self.browser.find_element_by_class_name('page-link')
-        if next:
+        try:
+            next = self.browser.find_element_by_class_name('page-link')
             self.assertEqual(next.text, '▶')
-        cur_url = self.browser.current_url
-        self.assertEqual(cur_url + '&page=2', next.get_attribute('href'))
+            cur_url = self.browser.current_url
+            self.assertEqual(cur_url + '&page=2', next.get_attribute('href'))
+        except NoSuchElementException:
+            pass
         # next 페이지에 나타난 첫번째 아이템이 선우가 팔려고 했던 책이다.
         buyback_link = self.browser.find_element_by_css_selector('.row .col-md-9 a')
         #  표시된 링크와 실제 연결된 링크가 해당 인터넷 사이트로 연결되는지 확인한다.
