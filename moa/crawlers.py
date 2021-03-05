@@ -95,9 +95,11 @@ def crawl_yes24(searchword, page):
 
 
 def crawl_aladin(searchword, page):
-    url = aladin_base_url + '?KeyWord=' + quote(searchword, encoding="cp949") + '&ActionType=1&SearchTarget=Book&page='
+    url = aladin_base_url + '?KeyWord=' + quote(searchword, encoding="utf8") + '&ActionType=1&SearchTarget=Book&page='
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/60.0.3112.90 Safari/537.36',
         'Referer': url + '1'
         # 'Connection':'close'
     }
@@ -107,7 +109,7 @@ def crawl_aladin(searchword, page):
     except HTTPError:
         return []
     # response = urlopen(url)  ## 헤더 다 필요없이 그냥 보내기
-    html = response.read().decode('cp949')
+    html = response.read().decode('utf8')
     soup = BeautifulSoup(html, 'html.parser')
     item = select_aladin(soup, page, response.url)
     return item
