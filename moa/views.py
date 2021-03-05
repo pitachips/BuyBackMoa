@@ -38,8 +38,9 @@ def result(request):
 
     if not query:
         raise Http404()
-    if len(query.encode()) > 97:
-        raise RequestDataTooBig('Memecached key length must be less than 100 bytes')
+
+    if len(query.encode("utf8")) > 100:  # ring에서 prefix를 붙이므로 적절히 100으로 한다
+        raise RequestDataTooBig('Memcached key length must be less than 100 bytes')
 
     key = query.strip().replace(" ", ".")
     total_resultset = search_books(key)
