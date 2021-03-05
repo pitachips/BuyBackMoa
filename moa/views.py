@@ -20,6 +20,7 @@ def index(request):
 def search_books(query: str) -> List[Any]:
     total_resultset = []
     with futures.ThreadPoolExecutor(max_workers=6) as exe:
+        # NOTE: 알라딘 6페이지, 예스24 4페이지는 자의적인 넘버
         fs = tuple(filter(None, sum(zip_longest([exe.submit(crawl_aladin, query, page) for page in range(1, 6)],
                                                 [exe.submit(crawl_yes24, query, page) for page in range(1, 4)]), ())))
         done, undone = futures.wait(fs, timeout=3)
@@ -28,6 +29,7 @@ def search_books(query: str) -> List[Any]:
                 f.cancel()
         for f in done:
             total_resultset += f.result()
+    total_resultset.sort(key=lambda x: x.get('title'))
     return total_resultset
 
 
