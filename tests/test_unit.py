@@ -30,11 +30,11 @@ class ResultPageTest(TestCase):
         response = self.client.get(reverse('result'), {})
         self.assertEqual(response.status_code, 404)
 
-    def test_searchword_gt_100bytes_throws_http400(self):  # bad request
+    def test_searchword_gt_250bytes_throws_http400(self):  # bad request
         # 100byte 미만까지만 허용. nul-terminator가 2 바이트 차지. 영문자는 1바이트. 한글은 3바이트 차지
-        response = self.client.get(reverse('result'), {'searchword': 'a' * 98, })
+        response = self.client.get(reverse('result'), {'searchword': 'a' * 101, })
         self.assertEqual(response.status_code, 400)
-        response = self.client.get(reverse('result'), {'searchword': '가' * 33, }) # 100byte 미만까지만 허용. nul-terminator가 2 바이트 차지 가능하므로
+        response = self.client.get(reverse('result'), {'searchword': '가' * 34, })
         self.assertEqual(response.status_code, 400)
 
     def test_searchword_lt_100bytes_silently_succeeds(self):

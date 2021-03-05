@@ -30,7 +30,12 @@ with open('secret.json', 'r') as f:
 DEBUG = False
 ALLOWED_HOSTS = ['52.78.139.88', ]
 SECRET_KEY = secret['SECRET_KEY']
-DATABASES = {}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
 
 # Application definition
