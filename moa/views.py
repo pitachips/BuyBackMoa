@@ -1,5 +1,3 @@
-import json
-import ring
 from typing import Any, List
 from concurrent import futures
 from itertools import zip_longest
@@ -8,6 +6,9 @@ from django.core.exceptions import RequestDataTooBig
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.shortcuts import render
+
+import ring
+
 from .crawlers import crawl_yes24, crawl_aladin, yes24_base_url, aladin_base_url
 
 
@@ -15,7 +16,7 @@ def index(request):
     return render(request, 'moa/index.html')
 
 
-@ring.django.cache(expire=30*60, coder="json")  # 단위는 초
+@ring.django.cache(expire=30 * 60, coder="json")  # 단위는 초
 def search_books(query: str) -> List[Any]:
     total_resultset = []
     with futures.ThreadPoolExecutor(max_workers=6) as exe:
@@ -33,7 +34,8 @@ def search_books(query: str) -> List[Any]:
 def result(request):
     # t1 = time.time()
     query = request.GET.get('searchword')
-    # validator 작성? [a-zA-Aㄱ-힣0-9-_!@#$%&*()=+.,/?'";:[]{}~₩]  // &# 비허용
+    # TODO: validator 작성? [a-zA-Aㄱ-힣0-9-_!@#$%&*()=+.,/?'";:[]{}~₩]  // &# 비허용
+
     if not query:
         raise Http404()
     if len(query.encode()) > 97:

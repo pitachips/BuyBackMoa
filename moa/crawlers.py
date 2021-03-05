@@ -81,12 +81,6 @@ def crawl_yes24(searchword, page):
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
         'Referer': url + '1'
     }
-    # params = {
-    #     'CategoryNumber':'018',
-    #     'SearchDomain':'BOOK',  # 국내도서
-    #     'BuybackAccept':'Y',
-    #     'pageIndex':page,
-    # }
     req = Request(url+str(page), headers=headers)
     try:
         response = urlopen(req)
@@ -107,12 +101,6 @@ def crawl_aladin(searchword, page):
         'Referer': url + '1'
         # 'Connection':'close'
     }
-    # params = {
-    #     'ActionType':1,
-    #     'SearchTarget':'Book',  # 국내도서
-    #     'page':page,
-    # }
-    # response = requests.get(url+str(page), headers=headers)
     req = Request(url=url+str(page), headers=headers)
     try:
         response = urlopen(req)
