@@ -19,6 +19,9 @@ jobs:
             pip3 install --upgrade pip setuptools
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
+            sudo apt-get -y update
+            sudo apt-get install memcached
+            sudo service memcached start
       - save_cache:
           paths:
             - ./venv
