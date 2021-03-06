@@ -29,7 +29,6 @@ def search_books(query: str) -> List[Any]:
                 f.cancel()
         for f in done:
             total_resultset += f.result()
-    total_resultset.sort(key=lambda x: x.get('title'))
     return total_resultset
 
 
